@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>MEO Workshop Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap">
+<style>
+/* Layout: single 1040px column on a soft paper ground; white cards only for blocks you act on; mirrors the MEO Regional Goals look */
+:root{
+  --blue:#041e42; --gold:#b9831a; --gold-soft:#fbf1dc; --azure:#1f43ea;
+  --ink:#1a1c1f; --muted:#5b6675; --paper:#f2f3f6; --card:#ffffff; --paper-2:#f7f8fa; --line:#e4e6ea;
+  --red:#a3123a; --red-soft:#fbe6ec; --green:#17794a; --green-soft:#e2f4ea; --amber-soft:#fdf3dd;
+  --opt:#e8f5ec; --opt-ink:#1f6b3d; --orange:#d9650b; --teal:#0e8fa8;
+  --font:'Helvetica Neue',Helvetica,Arial,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --display:'Poppins',var(--font);
+  --radius:16px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --blue:#e9eef8; --gold:#e3b04b; --gold-soft:#3a2f17; --azure:#7b93ff;
+  --ink:#e6e8ec; --muted:#9aa4b2; --paper:#0d1320; --card:#161e2e; --paper-2:#1b2435; --line:#2a3447;
+  --red:#ff7f9b; --red-soft:#3a1822; --green:#5fd39a; --green-soft:#16302a; --amber-soft:#3a2f17;
+  --opt:#163024; --opt-ink:#8fe0ae; --orange:#ff9b4a; --teal:#4fd0e6; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --blue:#e9eef8; --gold:#e3b04b; --gold-soft:#3a2f17; --azure:#7b93ff;
+  --ink:#e6e8ec; --muted:#9aa4b2; --paper:#0d1320; --card:#161e2e; --paper-2:#1b2435; --line:#2a3447;
+  --red:#ff7f9b; --red-soft:#3a1822; --green:#5fd39a; --green-soft:#16302a; --amber-soft:#3a2f17;
+  --opt:#163024; --opt-ink:#8fe0ae; --orange:#ff9b4a; --teal:#4fd0e6; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.55}
+a{color:var(--azure)}
+.wrap{max-width:1040px;margin:0 auto;padding-inline:20px}
+h1,h2,h3{font-family:var(--display);color:var(--blue);text-wrap:balance;margin:0}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.muted{color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+
+/* top bar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--card);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;align-items:center;gap:16px;padding-block:12px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-weight:600;color:var(--blue);font-size:15px;margin-right:auto}
+.nav{display:flex;gap:6px;flex-wrap:wrap}
+.nav a{font-size:13px;font-weight:700;color:var(--azure);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:6px 12px;background:var(--card)}
+.nav a:hover,.nav a:focus-visible{border-color:var(--azure);outline:none}
+
+/* hero */
+.hero{padding-block:48px 8px;display:grid;gap:18px}
+.hero h1{font-size:clamp(32px,5vw,48px);line-height:1.12;font-weight:600;max-width:16ch}
+.hero p.lede{font-size:18px;color:var(--muted);max-width:60ch;margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 16px;font-size:14px}
+.chip b{color:var(--blue)}
+.tbc{color:var(--gold);font-weight:700}
+
+/* KPI tiles */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-block:24px 8px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;display:grid;gap:8px;align-content:start}
+.tile .lbl{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.tile .big{font-family:var(--display);font-size:34px;font-weight:600;color:var(--blue);line-height:1}
+.tile .big small{font-size:18px;color:var(--muted);font-weight:500}
+.meter{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--azure);border-radius:99px;transition:width .4s}
+.tile .sub{font-size:13px;color:var(--muted)}
+.tile .sub b{color:var(--ink)}
+
+section{padding-block:40px 0}
+.sec-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px}
+.grid2{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+
+/* cycle timeline */
+.phases{display:flex;gap:8px;flex-wrap:wrap}
+.ph{font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:6px;color:var(--muted)}
+.ph::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--c)}
+.p-prepare{--c:var(--gold)} .p-plan{--c:var(--orange)} .p-deliver{--c:var(--green)} .p-improve{--c:var(--teal)}
+.cycle{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:22px 0;position:relative}
+.cycle li{position:relative;padding:28px 12px 0 0;min-width:0}
+.cycle li::before{content:"";position:absolute;top:8px;left:0;right:0;height:3px;background:var(--line)}
+.cycle li.done::before,.cycle li.now::before{background:var(--c)}
+.cycle li.now::before{right:50%}
+.cycle .dot{position:absolute;top:1px;left:0;width:17px;height:17px;border-radius:50%;background:var(--card);border:3px solid var(--c);display:grid;place-items:center;z-index:1}
+.cycle li.done .dot{background:var(--c)}
+.cycle li.done .dot::after{content:"";width:5px;height:8px;border:solid var(--card);border-width:0 2px 2px 0;transform:translateY(-1px) rotate(45deg)}
+.cycle li.now .dot{background:var(--c);box-shadow:0 0 0 5px color-mix(in srgb,var(--c) 25%,transparent)}
+.cycle li.glc .dot{width:21px;height:21px;top:-1px}
+.cycle .when{font-size:11.5px;font-weight:700;color:var(--c);letter-spacing:.04em;text-transform:uppercase}
+.cycle .what{font-weight:700;color:var(--blue);font-size:14px;line-height:1.3;margin-top:2px}
+.cycle .det{font-size:12.5px;color:var(--muted);margin-top:3px}
+.cycle li.done .what,.cycle li.done .det{opacity:.6}
+.cycle .nowtag{display:inline-block;margin-top:6px;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--c);color:var(--card);border-radius:5px;padding:2px 6px}
+.months{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.month{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;display:grid;gap:14px;align-content:start}
+.month.cur{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft)}
+.month h3{font-size:17px}
+.month .grp{display:grid;gap:3px}
+.month .lead{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gold)}
+.month .grp.glc .lead{color:var(--green)}
+.month .grp.glc{background:var(--green-soft);border-radius:10px;padding:10px}
+.month .it{font-size:13.5px;color:var(--ink);line-height:1.35}
+.month .due{font-size:12px;color:var(--muted)}
+.note-strip{margin-top:20px;background:var(--paper-2);border-radius:12px;padding:12px 16px;font-size:14px;color:var(--muted)}
+
+/* list rows (dates, resources) */
+.rows{display:grid}
+.row{display:grid;grid-template-columns:84px minmax(0,1fr);gap:14px;padding-block:12px;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:0}
+.row .d{font-weight:700;color:var(--gold);font-size:14px}
+.row .t{font-weight:700;color:var(--ink)}
+.row .s{font-size:13px;color:var(--muted)}
+.row.past .d,.row.past .t{opacity:.5}
+
+.res h3{font-size:15px;margin-bottom:6px}
+.res ul{list-style:none;margin:0;padding:0;display:grid}
+.res li{padding-block:10px;border-top:1px solid var(--line);display:grid;gap:2px}
+.res li:first-child{border-top:0}
+.res .rt{font-weight:700;color:var(--ink);font-size:14px}
+.res a.rt{color:var(--azure);text-decoration:none}
+.res a.rt:hover{text-decoration:underline}
+.res .rs{font-size:12.5px;color:var(--muted)}
+.pill{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:3px 8px;justify-self:start}
+.pill.soon{background:var(--gold-soft);color:var(--gold)}
+.pill.proj{background:var(--paper-2);color:var(--muted);border:1px solid var(--line)}
+.pill.opt{background:var(--opt);color:var(--opt-ink)}
+.pill.gray{background:var(--amber-soft);color:var(--gold)}
+.pill.red{background:var(--red-soft);color:var(--red)}
+
+/* agenda */
+.agenda{display:grid;gap:0}
+.mod{display:grid;grid-template-columns:minmax(0,1fr) 64px;gap:4px 16px;padding-block:12px;border-top:1px solid var(--line);align-items:center}
+.mod:first-child{border-top:0}
+.mod .mn{font-weight:700;color:var(--blue)}
+.mod .mc{font-size:13px;color:var(--muted);grid-column:1}
+.mod .mm{font-family:var(--display);font-weight:600;color:var(--blue);text-align:right;grid-row:1/span 2;grid-column:2}
+.mod .mbar{grid-column:1/-1;height:6px;background:var(--line);border-radius:6px;overflow:hidden}
+.mod .mbar i{display:block;height:100%;background:var(--azure)}
+.mod.opt{background:var(--opt);border-radius:10px;padding-inline:12px;border-top:0;margin-top:6px}
+.mod.opt .mn,.mod.opt .mm{color:var(--opt-ink)}
+.mod.opt .mbar i{background:var(--opt-ink)}
+.stack{display:flex;height:22px;border-radius:8px;overflow:hidden;margin-block:10px 14px}
+.stack span{display:block;height:100%}
+.legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 14px;font-size:13px}
+.legend div{display:flex;gap:8px;align-items:center;min-width:0}
+.legend i{width:10px;height:10px;border-radius:3px;flex:none}
+.legend b{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--blue)}
+
+/* notes */
+details.note{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:0;margin-bottom:14px}
+details.note summary{list-style:none;cursor:pointer;padding:20px 24px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+details.note summary::-webkit-details-marker{display:none}
+details.note summary:focus-visible{outline:2px solid var(--azure);outline-offset:-2px;border-radius:var(--radius)}
+details.note summary h3{font-size:18px;flex:1 1 300px}
+details.note summary .tog{font-size:13px;font-weight:700;color:var(--azure)}
+details.note[open] summary .tog::after{content:"Hide"} details.note:not([open]) summary .tog::after{content:"Show"}
+.note-body{padding:0 24px 24px;display:grid;gap:18px}
+.note-body h4{margin:0 0 6px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+.note-body ul{margin:0;padding-left:18px;display:grid;gap:6px}
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{text-align:left;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+td.who{font-weight:700;color:var(--blue)}
+
+/* tasks */
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.filters .lab{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-right:4px}
+.fbtn{font:inherit;font-size:13px;font-weight:700;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer}
+.fbtn[aria-pressed="true"]{background:var(--blue);color:var(--card);border-color:var(--blue)}
+.fbtn:focus-visible{outline:2px solid var(--azure);outline-offset:2px}
+.group-h{font-family:var(--display);font-weight:600;color:var(--blue);font-size:15px;padding:18px 0 6px;display:flex;justify-content:space-between}
+.task{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:12px;padding-block:12px;border-top:1px solid var(--line);align-items:start}
+.task input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--azure);cursor:pointer}
+.task .tt{font-weight:700;color:var(--ink)}
+.task.done .tt{text-decoration:line-through;color:var(--muted)}
+.task .tm{font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:3px}
+.task .tm b{color:var(--ink);font-weight:700}
+.task .tn{font-size:12.5px;color:var(--muted);margin-top:4px;font-style:italic}
+.task .tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.sync{font-size:12.5px;color:var(--muted)}
+.empty{padding:20px 0;color:var(--muted)}
+
+/* call schedule */
+.next .when-big{font-family:var(--display);font-size:24px;font-weight:600;color:var(--blue);margin:6px 0 2px}
+.next .att{display:flex;gap:10px;align-items:center;margin:12px 0 8px}
+.next .att .meter{flex:1}
+.next ul{margin:0;padding:0;list-style:none;display:grid;gap:4px;font-size:14px}
+.next li{display:flex;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding-top:4px}
+.next li.o{color:var(--red);text-decoration:line-through}
+.next li.e span:last-child{color:var(--gold);font-weight:700}
+.slots{margin:6px 0 0;padding-left:18px;display:grid;gap:4px;font-size:14px}
+table.sched{min-width:760px;font-size:13.5px}
+table.sched th{white-space:nowrap}
+table.sched th.past,table.sched td.past{opacity:.45}
+table.sched th.nx{color:var(--gold)}
+table.sched th .sl{display:block;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:none;color:var(--muted)}
+table.sched td.pp{font-weight:700;color:var(--blue);white-space:nowrap}
+table.sched td.pp small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+table.sched tr.tot td{font-weight:700;color:var(--blue);border-bottom:0}
+.cell{font:inherit;font-size:13px;width:100%;text-align:left;border:1px solid var(--line);background:var(--green-soft);color:var(--ink);border-radius:8px;padding:6px 8px;cursor:pointer;white-space:nowrap}
+.cell.odd{background:var(--amber-soft);color:var(--gold);font-weight:700}
+.cell.maybe{background:var(--card);border:1px dashed var(--gold);color:var(--gold);font-weight:700}
+table.sched td .sl{display:block;font-size:11px;font-weight:600;color:var(--gold)}
+.cell.out{background:var(--red-soft);color:var(--red);text-decoration:line-through}
+.cell.fixed{cursor:default}
+.cell:focus-visible{outline:2px solid var(--azure);outline-offset:1px}
+.cell .tg{display:block;font-size:11px;text-decoration:none;font-weight:600}
+.key{display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:var(--muted);margin-top:12px}
+.key span{display:flex;gap:6px;align-items:center}
+.k{width:12px;height:12px;border-radius:3px;border:1px solid var(--line)}
+.k.ok{background:var(--green-soft)} .k.odd{background:var(--amber-soft)} .k.out{background:var(--red-soft)} .k.maybe{background:var(--card);border:1px dashed var(--gold)}
+.ooo{margin-top:20px;padding-top:16px;border-top:1px solid var(--line)}
+.chips.small .chip{font-size:13px;padding:6px 12px}
+
+/* view tabs */
+.tabs{display:flex;gap:4px;margin-block:28px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.tab{font:inherit;font-family:var(--display);font-weight:600;font-size:15px;color:var(--muted);background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px;margin-bottom:-1px;cursor:pointer}
+.tab[aria-selected="true"]{color:var(--blue);border-bottom-color:var(--gold)}
+.tab:focus-visible{outline:2px solid var(--azure);outline-offset:2px;border-radius:6px}
+#view-content > section:first-child,#view-meetings > section:first-child{padding-top:28px}
+
+/* meetings */
+.mtg{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:12px}
+.mtg summary{list-style:none;cursor:pointer;padding:18px 22px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 14px;align-items:center}
+.mtg summary::-webkit-details-marker{display:none}
+.mtg summary:focus-visible{outline:2px solid var(--azure);outline-offset:-2px;border-radius:var(--radius)}
+.mtg .mt{font-family:var(--display);font-weight:600;color:var(--blue);font-size:17px}
+.mtg .ms{font-size:13px;color:var(--muted)}
+.mtg .mpills{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;grid-row:1/span 2;grid-column:2}
+.pill.ok{background:var(--green-soft);color:var(--green)}
+.mtg .mb{padding:0 22px 22px;display:grid;gap:16px}
+.mtg .mb h4{margin:0 0 6px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+.mtg .notes-txt{white-space:pre-wrap;line-height:1.6;max-width:75ch}
+.mtg .empty{padding:0;color:var(--muted);font-style:italic}
+.mtg textarea,.mtg input[type=url]{font:inherit;font-size:14px;width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--paper-2);color:var(--ink)}
+.mtg textarea{min-height:180px;resize:vertical}
+.mtg textarea:focus,.mtg input:focus{outline:2px solid var(--azure);outline-offset:1px}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{font:inherit;font-size:14px;font-weight:700;border-radius:999px;padding:8px 16px;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--azure)}
+.btn.primary{background:var(--blue);color:var(--card);border-color:var(--blue)}
+.btn:focus-visible{outline:2px solid var(--azure);outline-offset:2px}
+
+footer{padding-block:48px 40px;color:var(--muted);font-size:13px;display:grid;gap:4px}
+footer b{color:var(--blue);font-family:var(--display)}
+
+@media (max-width:860px){
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid2,.grid3{grid-template-columns:minmax(0,1fr)}
+  .cycle{grid-template-columns:minmax(0,1fr);gap:0}
+  .cycle li{padding:0 0 16px 32px}
+  .cycle li::before{top:0;bottom:0;left:7px;right:auto;width:3px;height:auto}
+  .cycle li.now::before{right:auto;bottom:50%}
+  .cycle .dot{top:0}
+  .months{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:460px){.kpis{grid-template-columns:minmax(0,1fr)} .task{grid-template-columns:28px minmax(0,1fr)} .task .tags{grid-column:2;justify-content:flex-start}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+</head>
+<body>
+<header class="bar">
+  <div class="wrap">
+    <div class="brand">MEO Workshop · GLC 2027</div>
+    <nav class="nav" aria-label="Sections">
+      <a href="#road">Road to GLC</a><a href="#calls">Calls</a><a href="#resources">Resources</a><a href="#tasks">Tasks</a><a href="#content">Content</a><a href="#meetings">Meetings</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="hero">
+    <div class="eyebrow">Officer Education · Delivery Team Hub</div>
+    <h1>Member Engagement Officer Workshop</h1>
+    <p class="lede">One place for the MEO delivery team: the road to GLC, team calls, shared resources, the management task list, workshop content, and meeting notes and recordings.</p>
+    <div class="chips">
+      <span class="chip"><b>Management Partners</b> · Niloma, Mandi, Tamara, Jennifer</span>
+      <span class="chip"><b>Champions</b> · Jill Nykoliation, Marios Kalochoritis, Ben Chong, Mia Feasey</span>
+      <span class="chip"><b>LDT partner</b> · Pria Khullar</span>
+      <span class="chip"><b>Data &amp; Insights</b> · Pietro</span>
+    </div>
+  </div>
+
+  <div class="tabs" role="tablist" aria-label="Hub views">
+    <button class="tab" role="tab" id="tab-hub" aria-controls="view-hub" aria-selected="true" data-view="hub">Planning hub</button>
+    <button class="tab" role="tab" id="tab-content" aria-controls="view-content" aria-selected="false" data-view="content">Workshop content</button>
+    <button class="tab" role="tab" id="tab-meetings" aria-controls="view-meetings" aria-selected="false" data-view="meetings">Meeting notes &amp; recordings</button>
+  </div>
+  <div id="view-hub" role="tabpanel" aria-labelledby="tab-hub">
+  <div class="kpis">
+    <div class="tile"><div class="lbl">GLC Bangkok</div><div class="big num" id="dBkk">–<small> days</small></div><div class="sub">15–16 Mar 2027 · WDT rehearsal 14 Mar</div></div>
+    <div class="tile"><div class="lbl">GLC San Diego</div><div class="big num" id="dSd">–<small> days</small></div><div class="sub">3–4 May 2027 · WDT rehearsal 2 May</div></div>
+    <div class="tile"><div class="lbl">Management tasks</div><div class="big num"><span id="kDone">0</span><small> / <span id="kTot">45</span></small></div><div class="meter"><i id="kBar" style="width:0%"></i></div><div class="sub"><b id="kPct">0%</b> · ticked off from the RACI</div></div>
+    <div class="tile"><div class="lbl">Core programme</div><div class="big num">480<small> min</small></div><div class="meter"><i style="width:100%"></i></div><div class="sub"><b>8 hours</b> · plus 115 min optional Membership Team content</div></div>
+  </div>
+
+  <!-- ROAD TO GLC -->
+  <section id="road">
+    <div class="sec-head"><div class="eyebrow">Road to GLC · the workshop cycle</div>
+      <div class="phases"><span class="ph p-prepare">Prepare</span><span class="ph p-plan">Plan</span><span class="ph p-deliver">Deliver</span></div></div>
+    <div class="card">
+      <ol class="cycle" id="cycle"></ol>
+      <div class="note-strip" id="cycleNow"></div>
+    </div>
+
+    <div class="sec-head" style="margin-top:28px"><div class="eyebrow">Key milestones · Jan–May 2027</div><span class="sync">Counted back from GLC Bangkok</span></div>
+    <div class="months" id="months"></div>
+  </section>
+
+  <!-- CALLS -->
+  <section id="calls">
+    <div class="sec-head"><div class="eyebrow">GLC content team calls · Oct–Dec 2026</div><span class="sync">Cadence owner: Tamara (backup Niloma)</span></div>
+    <div class="grid2" style="margin-bottom:16px">
+      <div class="card next" id="nextCall"></div>
+      <div class="card">
+        <div class="eyebrow" style="margin-bottom:10px">How the calls work</div>
+        <p style="margin:0 0 8px">Every 2 weeks · 60 minutes · Tuesday for the Americas, Wednesday for everyone else.</p>
+        <p style="margin:0 0 8px"><b>Kick-off Zoom:</b> <a href="https://ypo.zoom.us/j/94701987638" target="_blank" rel="noopener">ypo.zoom.us/j/94701987638</a></p>
+        <ul class="slots">
+          <li><b>Slot A</b> Best for Asia-Pacific. Americas join in the evening, Marios at 5am.</li>
+          <li><b>Slot B</b> Best for the Americas. Dubai, Kolkata and KL join very late or very early.</li>
+          <li><b>Slot C</b> 4 Nov only, while Marios is in North America. A reasonable hour for everyone.</li>
+        </ul>
+        <p class="muted" style="margin:8px 0 0;font-size:13px">6 separate invites, not a series; calendars convert to local time. Clock changes are built in (Cyprus 25 Oct, North America 1 Nov).</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="sec-head" style="margin-bottom:6px"><h3 style="font-size:17px">Who can make which call</h3><span class="sync" id="rsvpNote">Loading…</span></div>
+      <p class="muted" style="margin:0 0 12px;font-size:14px">Each person's local day and time. Tap a time to mark that person as unable to attend; tap again to undo.</p>
+      <div class="tbl-wrap"><table class="sched" id="sched"></table></div>
+      <div class="key">
+        <span><i class="k ok"></i>Can attend</span><span><i class="k odd"></i>Very early or late locally</span><span><i class="k maybe"></i>Maybe</span><span><i class="k out"></i>Can't make it</span>
+      </div>
+      <div class="ooo">
+        <div class="eyebrow" style="margin-bottom:8px">Out of office &amp; travel</div>
+        <div class="chips small">
+          <span class="chip"><b>Niloma</b> · 16–23 Oct, 26–27 Nov</span>
+          <span class="chip"><b>Mandi</b> · 12–16 Oct, 26–29 Oct, 25–30 Nov</span>
+          <span class="chip"><b>Jennifer</b> · 22–25 Oct, 22 Dec–3 Jan</span>
+          <span class="chip"><b>Tamara</b> · 18–23 Oct, 24–27 Nov</span>
+          <span class="chip"><b>Marios</b> · in North America 30 Oct–16 Nov</span>
+          <span class="chip"><b>Mia</b> · in Sydney 15–22 Oct</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESOURCES -->
+  <section id="resources">
+    <div class="sec-head"><div class="eyebrow">Resources &amp; presentations</div></div>
+    <div style="margin-bottom:16px">
+      <div class="card res">
+        <h3>Shared spaces</h3>
+        <ul>
+          <li><a class="rt" href="https://youngpresidentsorg-my.sharepoint.com/:b:/r/personal/tamara_crowhurst_ypo_org/Documents/FY26-27/GLC/Previous%20Year%20Content/FY26%20MEOW-A.pdf?d=w0c1c99570fb34c2887ff08de6dd3e811&amp;csf=1&amp;web=1&amp;e=QxmN9P" target="_blank" rel="noopener">Previous GLC content &amp; decks</a><span class="rs">FY26 MEOW-A deck (PDF) · SharePoint</span></li>
+          <li><a class="rt" href="https://youngpresidentsorg-my.sharepoint.com/:f:/r/personal/tamara_crowhurst_ypo_org/Documents/FY26-27/GLC/Previous%20Surveys%20%26%20Evaluations?d=w8143696f045b460bacd12eb2fb3ed21c&amp;csf=1&amp;web=1&amp;e=nz2PRn" target="_blank" rel="noopener">Previous GLC surveys &amp; evaluations</a><span class="rs">Folder · SharePoint</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card res">
+        <h3>Content &amp; past learning</h3>
+        <ul>
+          <li><span class="rt">FY27 MEO in-person workshop outline</span><span class="rs">Objective, outcomes, modules, recommended focus areas</span><span class="pill proj">Project</span></li>
+          <li><span class="rt">Workshop Success Tips (Pietro)</span><span class="rs">Lessons from past MEO workshops; using Data &amp; Insights</span><span class="pill proj">Project</span></li>
+          <li><a class="rt" href="https://youngpresidentsorg.sharepoint.com/sites/LeadershipDevelopmentDept/Shared%20Documents/Forms/AllItems.aspx?viewid=50bd3965%2D998d%2D4aeb%2Da73c%2D98219848a4eb&amp;id=%2Fsites%2FLeadershipDevelopmentDept%2FShared%20Documents%2FOfficer%20Education%20Materials%2FFY25%2D26%20%2D%20CURRENT%2FWorkshop%20Delivery%20Team%20materials%2FIce%20Breakers%2C%20Energizers%2C%20Common%20Challenges%2C%20Refocusing%20Ideas%20for%20GLC%2Epdf&amp;parent=%2Fsites%2FLeadershipDevelopmentDept%2FShared%20Documents%2FOfficer%20Education%20Materials%2FFY25%2D26%20%2D%20CURRENT%2FWorkshop%20Delivery%20Team%20materials" target="_blank" rel="noopener">Ice Breakers, Energizers &amp; Refocusing Ideas</a><span class="rs">WDT materials on SharePoint</span></li>
+          <li><a class="rt" href="https://event.ypo.org/event/5c6b3a13-42e9-491d-a531-d9b9fc785d8f/apeiron-events-calendar?i=c9uJvSuYO0ug-ls0alILbg" target="_blank" rel="noopener">Apeiron events calendar</a><span class="rs">For the optional Apeiron Member Experience module</span></li>
+          <li><a class="rt" href="https://canva.link/tead09crqe94lbu" target="_blank" rel="noopener">Event in a Box</a><span class="rs">Creating Belonging in Chapters resource</span></li>
+          <li><a class="rt" href="https://app.smartsheet.com/b/publish?EQBCT=4d8519a141f14a559b9a101b374707ef" target="_blank" rel="noopener">Chapter Inclusion Survey</a><span class="rs">Inclusion Data &amp; Application Lab</span></li>
+          <li><a class="rt" href="https://canva.link/iwbd5sfl8q2yu3l" target="_blank" rel="noopener">Member Story Library</a><span class="rs">RMEO and member stories for case discussion</span></li>
+          <li><a class="rt" href="https://image.ypo-mail.org/lib/fe2f1171716404787c1478/m/1/0e642559-22cc-4c0c-910f-281769e2df29.pdf" target="_blank" rel="noopener">Strategic Membership Pathways (SMP)</a><span class="rs">PDF overview</span></li>
+        </ul>
+      </div>
+      <div class="card res">
+        <h3>Presentations &amp; participant materials</h3>
+        <ul>
+          <li><span class="rt">MEOW 2027 workshop deck</span><span class="rs">Built in Canva · Content &amp; Workshop Canva: Mandi (backup Jenn)</span><span class="pill soon">Coming soon</span></li>
+          <li><span class="rt">Leader's Guide (slide notes)</span><span class="rs">Niloma, backup Mandi</span><span class="pill soon">Coming soon</span></li>
+          <li><span class="rt">Participant Guide &amp; workbook</span><span class="rs">Engagement strategy, scorecard, 30-60-90 plan</span><span class="pill soon">Coming soon</span></li>
+          <li><span class="rt">Pre-workshop survey</span><span class="rs">Mandi, backup Niloma</span><span class="pill soon">Coming soon</span></li>
+          <li><span class="rt">Registration insights &amp; Champion briefing</span><span class="rs">Exec Summary: Jenn, backup Mandi</span><span class="pill soon">Coming soon</span></li>
+          <li><span class="rt">Follow-up resources &amp; 3-2-1 comms</span><span class="rs">Post-workshop, by cohort</span><span class="pill soon">Coming soon</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- TASKS -->
+  <section id="tasks">
+    <div class="sec-head"><div class="eyebrow">Management task list</div><span class="sync" id="syncNote">Loading shared ticks…</span></div>
+    <div class="card">
+      <div class="filters" role="group" aria-label="Show">
+        <span class="lab">Show</span>
+        <button class="fbtn" data-f="state" data-v="open" aria-pressed="true">Open</button>
+        <button class="fbtn" data-f="state" data-v="all" aria-pressed="false">All</button>
+        <button class="fbtn" data-f="state" data-v="done" aria-pressed="false">Done</button>
+      </div>
+      <div class="filters" role="group" aria-label="Owner">
+        <span class="lab">Owner</span>
+        <button class="fbtn" data-f="who" data-v="all" aria-pressed="true">Everyone</button>
+        <button class="fbtn" data-f="who" data-v="Tamara" aria-pressed="false">Tamara</button>
+        <button class="fbtn" data-f="who" data-v="Niloma" aria-pressed="false">Niloma</button>
+        <button class="fbtn" data-f="who" data-v="Mandi" aria-pressed="false">Mandi</button>
+        <button class="fbtn" data-f="who" data-v="Jennifer" aria-pressed="false">Jennifer</button>
+        <button class="fbtn" data-f="who" data-v="Shared" aria-pressed="false">Shared</button>
+        <button class="fbtn" data-f="who" data-v="Champions" aria-pressed="false">Champions</button>
+        <button class="fbtn" data-f="who" data-v="TBC" aria-pressed="false">Unassigned</button>
+      </div>
+      <div id="taskList"></div>
+      <p class="muted" style="font-size:13px;margin:16px 0 0"><b>Owner</b> = Responsible (does the work). <b>Backup</b> = Accountable (checks it's done, steps in).</p>
+    </div>
+  </section>
+
+  </div>
+  <div id="view-content" role="tabpanel" aria-labelledby="tab-content" hidden>
+  <!-- CONTENT -->
+  <section id="content">
+    <div class="sec-head"><div class="eyebrow">Workshop content · FY27 outline</div><span class="sync">Source: MEOW Excel, Agenda tab</span></div>
+    <div class="card" style="margin-bottom:16px">
+      <h2 style="font-size:20px;margin-bottom:8px">Objective</h2>
+      <p style="margin:0;max-width:72ch">Equip Member Engagement Officers to lead engagement as a strategic driver of chapter health, member value and retention, using insight, experience design, inclusive community-building and data to deliver measurable outcomes.</p>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="eyebrow" style="margin-bottom:6px">Modules · minutes</div>
+        <div class="agenda" id="agenda"></div>
+      </div>
+      <div style="display:grid;gap:16px;align-content:start">
+        <div class="card">
+          <div class="eyebrow">How the 480 minutes are delivered</div>
+          <div class="stack" id="stack" role="img" aria-label="Delivery method split of the 480 core minutes"></div>
+          <div class="legend" id="legend"></div>
+        </div>
+        <div class="card res">
+          <h3>Highest expected engagement</h3>
+          <ul>
+            <li><span class="rt">Member Journey &amp; Experience Design</span></li>
+            <li><span class="rt">Chapter Health &amp; Dashboard Challenge</span></li>
+            <li><span class="rt">Disengagement Intervention Lab</span></li>
+            <li><span class="rt">Forum, Peerdom &amp; Belonging conversations</span></li>
+            <li><span class="rt">Member Panel / Peer Problem-Solving</span></li>
+            <li><span class="rt">Strategic Planning &amp; 30-60-90 Execution</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NOTES -->
+  <section id="notes">
+    <div class="sec-head"><div class="eyebrow">Content notes</div></div>
+
+    <details class="note" open>
+      <summary><span class="pill proj">Workshop success tips</span><h3>Lessons from past MEO workshops · Pietro</h3><span class="tog"></span></summary>
+      <div class="note-body">
+        <div class="grid2">
+          <div><h4>What worked well</h4><ul><li>Practical engagement ideas and examples from other chapters.</li><li>A clearer view of the officer's role in onboarding, connection and retention.</li><li>Strong energy and peer sharing; people left with actionable concepts.</li></ul></div>
+          <div><h4>What to improve</h4><ul><li>More concrete case studies and proven chapter practices, less theory.</li><li>More consistent facilitation; tailor examples to different chapter contexts.</li><li>More practical tools for disengagement, onboarding and member experience.</li></ul></div>
+        </div>
+        <div><h4>Using data in the workshop</h4><ul><li>YPO is data rich: members, engagement, forums, events, learning, chapters.</li><li>Use dashboards, survey findings and benchmarks to bring content to life and prompt discussion.</li><li>Make sure participants know what data exists and how to access it during their year.</li><li>The management team coordinates with the Senior Director of Data &amp; Insights where extra expertise helps.</li></ul></div>
+      </div>
+    </details>
+
+    <details class="note">
+      <summary><span class="pill opt">Membership Team</span><h3>Optional modules proposed for FY27 · 115 min outside the core</h3><span class="tog"></span></summary>
+      <div class="note-body">
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Module</th><th>What it covers</th><th>Min</th></tr></thead>
+          <tbody>
+            <tr><td><b>FY27 Onboarding Journey &amp; Resources</b></td><td>First 24 months, Onboarding Hub, new member emails, Chapter Onboarding Toolkit</td><td class="num">25</td></tr>
+            <tr><td><b>Apeiron Member Experience</b></td><td>Member-led, 6–8 slides; connect Apeiron to chapter onboarding</td><td class="num">30</td></tr>
+            <tr><td><b>Creating Belonging in Chapters</b></td><td>Welcome–Connect–Engage–Measure framework; barriers to belonging</td><td class="num">35</td></tr>
+            <tr><td><b>Inclusion Data &amp; Application Lab</b></td><td>Chapter Inclusion Survey, participation gaps, four case studies, 90-day reflection</td><td class="num">25</td></tr>
+          </tbody>
+        </table></div>
+        <p class="muted" style="margin:0;font-size:14px">Decision needed: select, shorten or fold these into the core as priorities allow.</p>
+      </div>
+    </details>
+  </section>
+
+  </div>
+
+  <div id="view-meetings" role="tabpanel" aria-labelledby="tab-meetings" hidden>
+  <section id="meetings">
+    <div class="sec-head"><div class="eyebrow">Meeting notes &amp; recordings</div><span class="sync" id="mtgNote">Loading…</span></div>
+    <p class="muted" style="margin:0 0 16px;max-width:70ch">One entry per content team call. Add the notes, decisions and actions after each call, and paste the Zoom recording link so anyone who missed it can catch up.</p>
+    <div id="mtgList"></div>
+  </section>
+  </div>
+
+  <footer>
+    <b>Member Engagement Officer Workshop</b>
+    <span>Workshop Delivery Team · GLC 2027 · Management Partners: Niloma, Mandi, Tamara, Jennifer · Champions: Jill, Marios, Ben, Mia · LDT partner: Pria Khullar</span>
+    <span>Tasks from RACI Matrix WDTM – MEO v2 · Content from FY27 MEO workshop outline · Calls from GLC Content Team Meeting Schedule v8 · Last updated Wed 7 Oct 2026</span>
+  </footer>
+</main>
+
+<script>
+(function(){
+  const $=s=>document.querySelector(s);
+  const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  // View tabs
+  const VIEWS={hub:['road','calls','resources','tasks'],content:['content','notes'],meetings:['meetings']};
+  function showView(v,scrollTo){
+    document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.view===v));
+    $('#view-hub').hidden=v!=='hub'; $('#view-content').hidden=v!=='content'; $('#view-meetings').hidden=v!=='meetings';
+    try{localStorage.setItem('meo-view',v)}catch(e){}
+    if(scrollTo){const el=document.getElementById(scrollTo); if(el) el.scrollIntoView({behavior:'smooth',block:'start'});}
+  }
+  document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
+  document.querySelectorAll('.nav a').forEach(a=>a.addEventListener('click',e=>{
+    const id=a.getAttribute('href').slice(1); const v=Object.keys(VIEWS).find(k=>VIEWS[k].includes(id))||'hub';
+    e.preventDefault(); showView(v,id);
+  }));
+  (function(){const h=(location.hash||'').slice(1); const hv=Object.keys(VIEWS).find(k=>k!=='hub'&&VIEWS[k].includes(h)); if(hv) showView(hv,h);
+    else { let v=null; try{v=localStorage.getItem('meo-view')}catch(e){} if(v&&VIEWS[v]) showView(v); }})();
+  // Countdowns (Dubai calendar day)
+  const today=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Dubai'})); today.setHours(0,0,0,0);
+  const days=d=>Math.max(0,Math.round((new Date(d+'T00:00:00')-today)/864e5));
+  $('#dBkk').innerHTML=days('2027-03-15')+'<small> days</small>';
+  $('#dSd').innerHTML=days('2027-05-03')+'<small> days</small>';
+  // Workshop cycle (Officer Education "What happens next?")
+  const STAGES=[
+    ['prepare','Prepare','Aug–early Sep','Prepare for the workshop cycle','2026-08-01','2026-09-07'],
+    ['prepare','Management Meeting','Sep','Build partnership and align for the workshop cycle','2026-09-01','2026-09-30'],
+    ['prepare','WDTM','Sep','Align the Workshop Delivery Team and launch the cycle','2026-09-01','2026-09-30'],
+    ['plan','Transition','Late Sep','Establish planning cadence','2026-09-20','2026-10-06'],
+    ['plan','Frame the Plan','Oct','Define workshop goals and direction','2026-10-07','2026-10-31'],
+    ['plan','Design the Experience','Nov','Design the participant experience','2026-11-01','2026-11-30'],
+    ['plan','Build the Materials','Dec · done by late Dec','Develop workshop materials; all final before the Christmas break','2026-12-01','2026-12-23'],
+    ['plan','Prepare to Launch','Jan–early Mar','Review, rehearse and finalise logistics','2027-01-04','2027-03-12'],
+    ['deliver','GLC Bangkok','15–16 Mar','Deliver and gather insights','2027-03-13','2027-03-16',1],
+    ['deliver','Virtual Workshops','Late Mar–Jun','Refine through virtual delivery','2027-03-17','2027-06-30'],
+    ['deliver','GLC San Diego','3–4 May','Deliver at scale','2027-05-01','2027-05-04',1]
+  ];
+  const D=x=>new Date(x+'T00:00:00');
+  let cur=null;
+  $('#cycle').innerHTML=STAGES.map(st=>{
+    const done=today>D(st[5]); const now=!done&&today>=D(st[4]); if(now&&!cur)cur=st;
+    return `<li class="p-${st[0]}${done?' done':''}${now?' now':''}${st[6]?' glc':''}"><span class="dot"></span><div class="when">${esc(st[2])}</div><div class="what">${esc(st[1])}</div><div class="det">${esc(st[3])}</div>${now?'<span class="nowtag">We are here</span>':''}</li>`;
+  }).join('');
+  $('#cycleNow').innerHTML=cur?`<b>Now: ${esc(cur[1])}.</b> ${esc(cur[3])}.`:'';
+
+  // Key milestones, Jan–May 2027 (weeks before GLC Bangkok, 15 Mar)
+  const MONTHS=[
+    ['2027-01','January 2027',[['Our target · late Dec 2026','',['Deck, Leader\'s Guide and workbook built before the Christmas break','January onwards is for review and rehearsal']],['8 weeks pre-Bangkok','2027-01-18',['Content','Leader\'s Guide','Facilitator-ready date','Workbook scope confirmed']]]],
+    ['2027-02','February 2027',[['6 weeks pre-Bangkok','2027-02-01',['Rehearsal plans','JD facilitation coaching']],['4 weeks pre-Bangkok','2027-02-15',['Workbook content final']],['3 weeks pre-Bangkok','2027-02-22',['Pre-workshop engagement']],['End of February','',['LifeHikes training','LifeHikes Practice Labs']]]],
+    ['2027-03','March 2027',[['2 weeks pre-Bangkok','2027-03-01',['Audience profiling','Final workshop prep']],['GLC Bangkok','',['13 Mar · WDT Appreciation','14 Mar · WDT Rehearsals','15–16 Mar · GLC'],1],['Late March–June','',['Virtual workshops']]]],
+    ['2027-04','April 2027',[['2 weeks pre-San Diego','2027-04-19',['Bangkok and virtual lessons applied','Final adjustments for GLC']]]],
+    ['2027-05','May 2027',[['GLC San Diego','',['1 May · WDT Appreciation','2 May · WDT Rehearsal','3–4 May · GLC'],1]]]
+  ];
+  const ym=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0');
+  const fmtD=x=>D(x).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+  $('#months').innerHTML=MONTHS.map(m=>`<div class="month${m[0]===ym?' cur':''}"><h3>${m[1]}</h3>${m[2].map(g=>`<div class="grp${g[3]?' glc':''}"><div class="lead">${esc(g[0])}</div>${g[1]?`<div class="due">Week of ${fmtD(g[1])}</div>`:''}${g[2].map(i=>`<div class="it">${esc(i)}</div>`).join('')}</div>`).join('')}</div>`).join('');
+
+  // Call schedule (GLC Content Team Meeting Schedule v8). start = UTC start time.
+  const CALLS=[
+    {id:'c1',label:'Wed 7 / Thu 8 Oct',slot:'Kick-off',start:'2026-10-08T04:00:00Z',title:'MEOW GLC Content: Kick-off meeting',agenda:['Establish learning design','Build basic outline','Establish 3–4 learning objectives we all commit to','Finalise theme','Guest speakers (panellists)'],zoom:'https://ypo.zoom.us/j/94701987638'},
+    {id:'c2',label:'Tue 13 / Wed 14 Oct',slot:'A',start:'2026-10-14T02:00:00Z'},
+    {id:'c3',label:'Tue 3 / Wed 4 Nov',slot:'C (one-off)',start:'2026-11-04T01:00:00Z'},
+    {id:'c4',label:'Tue 17 / Wed 18 Nov',slot:'A',start:'2026-11-18T03:00:00Z'},
+    {id:'c5',label:'Tue 8 / Wed 9 Dec',slot:'B',start:'2026-12-08T20:00:00Z'},
+    {id:'c6',label:'Tue 15 / Wed 16 Dec',slot:'A · final full cohort (A+B)',start:'2026-12-16T03:00:00Z'}
+  ];
+  // per person: local times per call; '!' prefix = very early/late; 'OUT' = out per the schedule
+  const PEOPLE=[
+    ['mandi','Mandi','MP · S. California',['Wed 9pm','OUT|Out of office','Tue 5pm','Tue 7pm','Tue 12pm','Tue 7pm']],
+    ['jill','Jill','Champion · Toronto',['OUT|Can\'t make it','!Tue 10pm','OUT|Can\'t make it','!Tue 10pm','Tue 3pm','!Tue 10pm']],
+    ['marios','Marios','Champion · Cyprus',['Thu 7am','!Wed 5am','OUT|With a client (in US)','~Wed 5am|Just off a 36h flight','Tue 10pm','~Wed 4am|In Zurich']],
+    ['tamara','Tamara','MP · Dubai',['Thu 8am','Wed 6am','!Wed 5am','Wed 7am','!Wed 12am','Wed 7am']],
+    ['niloma','Niloma','MP · Kolkata',['Thu 9:30am','Wed 7:30am','Wed 6:30am','Wed 8:30am','!Wed 1:30am','Wed 8:30am']],
+    ['jennifer','Jennifer','MP · Kuala Lumpur',['Thu 12pm','Wed 10am','Wed 9am','Wed 11am','!Wed 4am','Wed 11am']],
+    ['ben','Ben','Champion · Sydney',['Thu 3pm','~Wed 1pm|On a course, will try','~Wed 4am|At GBS Istanbul, will try','Wed 2pm','Wed 7am','Wed 2pm']],
+    ['mia','Mia','Champion · New Zealand',['Thu 5pm','Wed 3pm','~Wed 2pm|On a course, will step out','Wed 4pm','Wed 9am','Wed 4pm']]
+  ];
+  let rsvp={}; // key `${callId}-${person}` -> true when can't attend
+  const now=Date.now();
+  const isPast=c=>now>new Date(c.start).getTime()+3600e3;
+  const nextIdx=CALLS.findIndex(c=>!isPast(c));
+  const cellState=(p,i)=>{const raw=p[3][i]; if(raw.startsWith('OUT'))return{out:true,fixed:true,txt:raw.split('|')[1]||'Out of office',tag:''};
+    const [t,tag]=raw.replace(/^[!~]/,'').split('|'); const out=!!rsvp[CALLS[i].id+'-'+p[0]]; return{out,maybe:!out&&raw[0]==='~',odd:raw[0]==='!',txt:t,tag:tag||''};};
+  function renderSched(){
+    let h='<thead><tr><th>Person</th>'+CALLS.map((c,i)=>`<th class="${isPast(c)?'past':''}${i===nextIdx?' nx':''}">${esc(c.label)}<span class="sl">Slot ${esc(c.slot)}${i===nextIdx?' · next':''}</span></th>`).join('')+'</tr></thead><tbody>';
+    PEOPLE.forEach(p=>{
+      h+=`<tr><td class="pp">${esc(p[1])}<small>${esc(p[2])}</small></td>`+CALLS.map((c,i)=>{const s=cellState(p,i);
+        const cls='cell'+(s.out?' out':s.maybe?' maybe':s.odd?' odd':'')+(s.fixed?' fixed':'');
+        const lab=s.out?(s.fixed?s.txt:"Can't make it"):(s.maybe?'Maybe · ':'')+s.txt;
+        return `<td class="${isPast(c)?'past':''}"><button type="button" class="${cls}" data-k="${c.id}-${p[0]}" ${s.fixed||isPast(c)?'disabled':''} aria-pressed="${s.out}" aria-label="${esc(p[1])}, ${esc(c.label)}: ${s.out?'not attending':'attending'}">${esc(lab)}${s.out&&!s.fixed?`<span class="tg">${esc(s.txt)}</span>`:s.tag?`<span class="tg">${esc(s.tag)}</span>`:''}</button></td>`;}).join('')+'</tr>';
+    });
+    h+='<tr class="tot"><td>Attending</td>'+CALLS.map((c,i)=>`<td class="num ${isPast(c)?'past':''}">${PEOPLE.filter(p=>{const s=cellState(p,i);return !s.out&&!s.maybe}).length} of ${PEOPLE.length}${PEOPLE.some(p=>cellState(p,i).maybe)?`<span class="sl">+ ${PEOPLE.filter(p=>cellState(p,i).maybe).length} maybe</span>`:''}</td>`).join('')+'</tr></tbody>';
+    $('#sched').innerHTML=h;
+    // next call card
+    const nc=$('#nextCall');
+    if(nextIdx<0){nc.innerHTML='<div class="eyebrow">Next content team call</div><p>All scheduled calls for Oct–Dec are done.</p>';return;}
+    const c=CALLS[nextIdx]; const st=PEOPLE.map(p=>({p,s:cellState(p,nextIdx)})); const n=st.filter(x=>!x.s.out&&!x.s.maybe).length; const nm=st.filter(x=>x.s.maybe).length;
+    const dubai=new Date(c.start).toLocaleString('en-GB',{timeZone:'Asia/Dubai',weekday:'short',day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true});
+    nc.innerHTML=`<div class="eyebrow">Next content team call</div><div class="when-big">${esc(c.label)}</div><div class="muted" style="font-size:14px">Slot ${esc(c.slot)} · ${esc(dubai)} Dubai time · 60 min</div>
+      <div class="att"><div class="meter"><i style="width:${n/PEOPLE.length*100}%"></i></div><b class="num">${n} of ${PEOPLE.length} confirmed${nm?` · ${nm} maybe`:''}</b></div>
+      ${c.title?`<div style="font-weight:700;margin-top:6px">${esc(c.title)}</div>`:''}${c.zoom?`<p style="margin:4px 0 0;font-size:14px"><a href="${c.zoom}" target="_blank" rel="noopener">Join on Zoom</a> · Meeting ID 947 0198 7638</p>`:''}${c.agenda?`<div class="eyebrow" style="margin:12px 0 4px">Agenda</div><ol class="slots" style="margin:0 0 12px">${c.agenda.map(a=>`<li>${esc(a)}</li>`).join('')}</ol>`:''}<ul>${st.map(x=>`<li class="${x.s.out?'o':(x.s.odd||x.s.maybe)?'e':''}"><span>${esc(x.p[1])}</span><span>${x.s.out?(x.s.fixed?esc(x.s.txt):"Can't make it"):(x.s.maybe?'Maybe · '+esc(x.s.tag):esc(x.s.txt))}</span></li>`).join('')}</ul>`;
+  }
+  renderSched();
+  $('#sched').addEventListener('click',async e=>{
+    const b=e.target.closest('button.cell'); if(!b||b.disabled)return; const k=b.dataset.k; const out=!rsvp[k];
+    if(out)rsvp[k]=true; else delete rsvp[k]; renderSched();
+    if(db){try{await db.collection('rsvp').doc(k).set({out,at:new Date().toISOString()});}catch(err){$('#rsvpNote').textContent='Could not save that change. You may have view-only access.';}}
+    else{try{localStorage.setItem('meo-rsvp',JSON.stringify(rsvp))}catch(e){}}
+  });
+  try{rsvp=JSON.parse(localStorage.getItem('meo-rsvp')||'{}');renderSched();}catch(e){}
+  // Meeting notes & recordings (shared via db when available)
+  let MTG={}; let mtgEditing=null;
+  function renderMeetings(){
+    const list=$('#mtgList'); if(!list) return;
+    list.innerHTML=CALLS.map((c,i)=>{
+      const m=MTG[c.id]||{}; const past=isPast(c); const ed=mtgEditing===c.id;
+      const dubai=new Date(c.start).toLocaleString('en-GB',{timeZone:'Asia/Dubai',weekday:'short',day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true});
+      const pills=(m.notes?'<span class="pill ok">Notes</span>':'')+(m.recording?'<span class="pill ok">Recording</span>':'')+(!past?'<span class="pill proj">Upcoming</span>':(!m.notes?'<span class="pill soon">Notes to add</span>':''));
+      const open=ed||i===nextIdx||(past&&i===nextIdx-1)||(nextIdx<0&&i===CALLS.length-1);
+      const body=ed?`<div><h4>Notes, decisions &amp; actions</h4><textarea id="mn-${c.id}" placeholder="Attendees, key decisions, actions with owners and dates…">${esc(m.notes||'')}</textarea></div>
+        <div><h4>Recording link</h4><input type="url" id="mr-${c.id}" placeholder="https://ypo.zoom.us/rec/…" value="${esc(m.recording||'')}"></div>
+        <div class="btnrow"><button class="btn primary" data-act="save" data-id="${c.id}">Save</button><button class="btn" data-act="cancel">Cancel</button><span class="sync" id="ms-${c.id}"></span></div>`
+       :`${c.agenda?`<div><h4>Agenda</h4><ol class="slots" style="margin:0">${c.agenda.map(a=>`<li>${esc(a)}</li>`).join('')}</ol></div>`:''}
+        <div><h4>Notes, decisions &amp; actions</h4>${m.notes?`<div class="notes-txt">${esc(m.notes)}</div>`:`<p class="empty">${past?'No notes added yet.':'Add notes after the call.'}</p>`}</div>
+        <div><h4>Recording</h4>${m.recording?`<a href="${esc(m.recording)}" target="_blank" rel="noopener">Watch the recording</a>`:'<p class="empty">No recording link yet.</p>'}</div>
+        <div class="btnrow"><button class="btn" data-act="edit" data-id="${c.id}">${m.notes||m.recording?'Edit':'Add notes &amp; recording'}</button>${m.at?`<span class="sync">Last updated ${new Date(m.at).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</span>`:''}</div>`;
+      return `<details class="mtg"${open?' open':''}><summary><span class="mt">${esc(c.title||'Content team call')} · ${esc(c.label)}</span><span class="mpills">${pills}</span><span class="ms">${esc(dubai)} Dubai · Slot ${esc(c.slot)}</span></summary><div class="mb">${body}</div></details>`;
+    }).join('');
+  }
+  $('#mtgList').addEventListener('click',async e=>{
+    const b=e.target.closest('button[data-act]'); if(!b) return; const act=b.dataset.act;
+    if(act==='edit'){mtgEditing=b.dataset.id; renderMeetings(); const t=document.getElementById('mn-'+mtgEditing); if(t)t.focus(); return;}
+    if(act==='cancel'){mtgEditing=null; renderMeetings(); return;}
+    if(act==='save'){
+      const id=b.dataset.id; const notes=document.getElementById('mn-'+id).value.trim(); let rec=document.getElementById('mr-'+id).value.trim();
+      const st=document.getElementById('ms-'+id);
+      if(rec && !/^https?:\/\//i.test(rec)){st.textContent='The recording link needs to start with https://';return;}
+      const doc={notes,recording:rec,at:new Date().toISOString()};
+      if(db){ try{ b.disabled=true; st.textContent='Saving…'; await db.collection('meetings').doc(id).set(doc); }catch(err){ b.disabled=false; st.textContent='Could not save. You may have view-only access.'; return; } }
+      else { try{const all=JSON.parse(localStorage.getItem('meo-mtg')||'{}'); all[id]=doc; localStorage.setItem('meo-mtg',JSON.stringify(all));}catch(e){} }
+      MTG[id]=doc; mtgEditing=null; renderMeetings();
+    }
+  });
+  try{MTG=JSON.parse(localStorage.getItem('meo-mtg')||'{}')}catch(e){}
+  renderMeetings();
+
+
+  // Agenda
+  const mods=[
+    ['Introduction / Icebreaker','Connection and current engagement priorities',10],
+    ['House Keeping','Objectives, agenda, Parking Lot, quick poll',10],
+    ['Member Engagement Officer Journey','Coordinator to strategic leader; maturity assessment; role map',45],
+    ['Designing Exceptional Member Experiences','Journey mapping, first 90 days, personas, disengagement lab',85],
+    ['FY27 Onboarding Journey & Resources','Membership Team · optional',25,1],
+    ['Apeiron Member Experience','Membership Team · optional',30,1],
+    ['Measuring & Improving Chapter Health','Dashboards, Engagement Compass, scorecard, benchmarking',60],
+    ['Building High-Performing Member Communities','Forum, Peerdom, belonging, SMP, peer practice',60],
+    ['Creating Belonging in Chapters','Membership Team · optional',35,1],
+    ['Inclusion Data & Application Lab','Membership Team · optional',25,1],
+    ['Future-Proofing Member Engagement','Member expectations, AI use cases, Stop / Start / Scale',45],
+    ['Strategic Planning','FY27 engagement strategy, Future Headlines, SMART goals',50],
+    ['Commitments','30-60-90 plan, accountability partner, reflection card',35],
+    ['Member Panel / Peer Exchange','Panel, Ask-Me-Anything, Hot Seat',30],
+    ['Community Standards','Peerdom, belonging and conduct; governance Q&A',20],
+    ['Global / Member Engagement Updates','FY27 update and "what changes for my chapter?"',30]
+  ];
+  const mx=85;
+  $('#agenda').innerHTML=mods.map(m=>`<div class="mod${m[3]?' opt':''}"><div class="mn">${esc(m[0])}</div><div class="mc">${esc(m[1])}</div><div class="mm num">${m[2]}</div><div class="mbar"><i style="width:${m[2]/mx*100}%"></i></div></div>`).join('')
+    +`<div class="mod"><div class="mn">Energizers</div><div class="mc">Distributed through the day</div><div class="mm" style="font-size:12px">Throughout</div></div>`;
+
+  // Delivery split
+  const split=[['Discussion',117,'var(--blue)'],['Workbook',110,'var(--azure)'],['Activity',98,'var(--gold)'],['Case study',50,'var(--green)'],['Talk time',25,'var(--muted)'],['Needs & Leads',25,'var(--red)'],['Live demo',20,'var(--opt-ink)'],['Panel',20,'var(--line)'],['Speaker',15,'var(--ink)']];
+  $('#stack').innerHTML=split.map(s=>`<span style="width:${s[1]/480*100}%;background:${s[2]}" title="${s[0]}: ${s[1]} min"></span>`).join('');
+  $('#legend').innerHTML=split.map(s=>`<div><i style="background:${s[2]}"></i>${s[0]}<b>${s[1]}</b></div>`).join('');
+
+  // Tasks from RACI v2: [id, group, task, owner, backup, workstream, gray, note]
+  const T=[
+    [1,'Logistical','Plan meeting cadence','Tamara','Niloma','WDT Planning & Readiness',0],
+    [2,'Logistical','Create and send calendar invites / Zoom links for all touchpoints','Tamara','Niloma','WDT Planning & Readiness',0],
+    [3,'Logistical',"Update Leader's Guides (slide notes)",'Niloma','Mandi','Content & Workshop Canva',0],
+    [4,'Logistical','Update Participant Guides','TBC','','Content & Workshop Canva',0,'Confirm what this covers'],
+    [5,'Logistical','Create meeting agendas','Tamara','Niloma','WDT Planning & Readiness',1],
+    [6,'Logistical','Manage Canva during run-throughs','Mandi','Jennifer','Content & Workshop Canva',0],
+    [7,'Logistical','Submit print requests','Tamara','Niloma','Content & Workshop Canva',0],
+    [8,'Logistical','Submit budget requests','Tamara','Niloma','Onsite Logistics',0],
+    [9,'Logistical','Purchase approved workshop items','Tamara','Niloma','Onsite Logistics',1],
+    [10,'Logistical','Request resources from the board','Jennifer','Mandi','Finding Resources',0],
+    [11,'Logistical','Identify attending member resources','Jennifer','Mandi','Finding Resources',0],
+    [12,'Logistical','Coordinate and communicate with resources','Jennifer','Mandi','Finding Resources',0],
+    [13,'Logistical','Point of contact for room set and AV requirements','Shared','All four','Onsite Logistics',0,'Decide who connects to the projector; alternate by location'],
+    [14,'Logistical','Schedule and manage onsite workshop rehearsals','TBC','','WDT Planning & Readiness',0,'Split between Cohorts A and B'],
+    [15,'Logistical','Analyse registration data and share insights with team','TBC','','Exec Summary',0,'Split between Cohorts A and B'],
+    [16,'Logistical','Create a briefing doc for Champions about registered officers','TBC','','Exec Summary',0,'Split between Cohorts A and B'],
+    [17,'Logistical','Create and manage seating chart','TBC','','Onsite Logistics',1,'Split between Cohorts A and B'],
+    [18,'Logistical','Analyse time used in the workshop (lecture vs activity) and share with LDT partner','Niloma','Tamara','Learning Design',1],
+    [19,'Logistical','Ship workshop materials to GLC location','Tamara','Niloma','Onsite Logistics',0,'Split between Cohorts A and B'],
+    [20,'Logistical','Onsite room set-up','TBC','','Onsite Logistics',0,'Split between Cohorts A and B'],
+    [21,'Logistical','Check prints are complete','Tamara','Niloma','Onsite Logistics',0],
+    [22,'Logistical','Retrieve supplies from OE office onsite','Tamara','Niloma','Onsite Logistics',0],
+    [23,'Logistical','Box materials and return to OE office, if applicable','Tamara','Niloma','Onsite Logistics',0],
+    [24,'Logistical','Update materials for virtual sessions','TBC','','Content & Workshop Canva',1,'Shared'],
+    [25,'Logistical','Schedule virtual workshop rehearsals with producer','TBC','','WDT Planning & Readiness',1,'Shared'],
+    [26,'Logistical','Attend virtual workshop facilitator training','Shared','All four','Knowledge & Skills',0],
+    [27,'Logistical','Submit expense reports on time','Shared','Each person','Own expenses',0],
+    [28,'Communication','Participant pre-workshop survey','Mandi','Niloma','Participant Comms',0],
+    [29,'Communication','Draft and send 3-2-1 WhatsApp','Champions','Champions','Participant Comms',1,'Split between Cohorts A and B'],
+    [30,'Communication','Create WhatsApp groups and invite workshop cohorts','Jennifer','Tamara','Participant Comms',0,'Jennifer/Mandi with Tamara/Niloma; split by cohort'],
+    [31,'Communication','Manage WhatsApp group communications','Jennifer','Tamara','Participant Comms',1,'Jennifer/Mandi with Tamara/Niloma; split by cohort'],
+    [32,'Communication','Communicate issues to LDT via WhatsApp during GLC','Shared','All four','LDT Partnership',1],
+    [33,'Communication','Draft and send post-workshop communication','Champions','Champions','Participant Comms',0,'Split between Cohorts A and B'],
+    [34,'Communication','Draft and send pre/post comms for virtual sessions','Champions','Champions','Participant Comms',0],
+    [35,'Relational','Connect with Champions','Shared','All four','Facilitation Support',1],
+    [36,'Relational','Spot and surface energy shifts in the room','Shared','All four','Facilitation Support',1],
+    [37,'Relational','Support a Champion struggling with confidence or time','Shared','All four','Facilitation Support',1],
+    [38,'Relational','Debrief misalignment / conflict with co-management partner','Shared','All four','LDT Partnership',1],
+    [39,'Relational','Send a heads-up to LDT partner about misalignment or conflict within cohorts','Niloma','Tamara, Mandi, Jennifer','LDT Partnership',1],
+    [40,'Relational','Offer post-delivery feedback to Champion','Shared','All four','After the Workshop',1],
+    [41,'Relational','Celebrate team and Champion effort post-delivery','Shared','All four','After the Workshop',0],
+    [42,'Planning','Review last year\'s workshop feedback, participant trends and officer needs','Niloma','Tamara','Learning Design',0,'Use Pietro\'s success tips and past GLC evaluations'],
+    [43,'Planning','Align roles, expectations, timelines and decision routes using the RACI','Tamara','Niloma','WDT Planning & Readiness',0],
+    [44,'Planning','Define purpose, audience, outcomes, core message and participant journey','Shared','All four','Learning Design',0,'On the 8 Oct kick-off agenda with the Champions'],
+    [45,'Planning','Confirm ownership of the major content areas','Tamara','Niloma','WDT Planning & Readiness',0]
+  ];
+  // Mandi also co-owns 30/31
+  const coOwner={30:'Mandi',31:'Mandi'};
+  // Informed parties (by task id)
+  const INFORMED={}; [42,43,44,45,1,14,15,16,17,18,24,25].forEach(id=>INFORMED[id]='Champions');
+  const GROUPS=['Planning','Logistical','Communication','Relational'];
+  const NUM={}; let _n=0; GROUPS.forEach(g=>T.filter(t=>t[1]===g).forEach(t=>{NUM[t[0]]=++_n;}));
+  let ticks={}; const f={state:'open',who:'all'}; let db=null; let local=true;
+  try{ticks=JSON.parse(localStorage.getItem('meo-ticks')||'{}')}catch(e){}
+
+  function matchWho(t){ if(f.who==='all')return true; return t[3]===f.who||coOwner[t[0]]===f.who; }
+  function render(){
+    const done=T.filter(t=>ticks['t'+t[0]]).length;
+    $('#kDone').textContent=done; $('#kTot').textContent=T.length;
+    const pct=Math.round(done/T.length*100); $('#kPct').textContent=pct+'%'; $('#kBar').style.width=pct+'%';
+    const groups=GROUPS; let html='';
+    groups.forEach(g=>{
+      const list=T.filter(t=>t[1]===g&&matchWho(t)&&(f.state==='all'||(f.state==='done')===!!ticks['t'+t[0]]));
+      if(!list.length)return;
+      const gd=T.filter(t=>t[1]===g&&ticks['t'+t[0]]).length, gt=T.filter(t=>t[1]===g).length;
+      html+=`<div class="group-h"><span>${g==='Planning'?'Planning · start here':g+' tasks'}</span><span class="sync num">${gd} of ${gt} done</span></div>`;
+      html+=list.map(t=>{
+        const on=!!ticks['t'+t[0]]; const owner=t[3]==='TBC'?'<span class="tbc">Owner TBC</span>':`Owner <b>${esc(t[3]+(coOwner[t[0]]?' / '+coOwner[t[0]]:''))}</b>`;
+        return `<div class="task${on?' done':''}"><input type="checkbox" id="cb${t[0]}" data-id="${t[0]}" ${on?'checked':''} aria-label="Mark task ${NUM[t[0]]} done"><label for="cb${t[0]}"><div class="tt">${NUM[t[0]]}. ${esc(t[2])}</div><div class="tm"><span>${owner}</span>${t[4]?`<span>Backup <b>${esc(t[4])}</b></span>`:''}<span>${esc(t[5])}</span>${INFORMED[t[0]]?`<span>Informed <b>${esc(INFORMED[t[0]])}</b></span>`:''}</div>${t[7]?`<div class="tn">${esc(t[7])}</div>`:''}</label><div class="tags">${t[0]===44?'<span class="pill soon">Kick-off agenda</span>':''}${t[3]==='TBC'?'<span class="pill red">Needs owner</span>':''}</div></div>`;
+      }).join('');
+    });
+    $('#taskList').innerHTML=html||'<div class="empty">Nothing here with these filters. Try "All" or "Everyone".</div>';
+  }
+  document.querySelectorAll('.fbtn').forEach(b=>b.addEventListener('click',()=>{
+    f[b.dataset.f]=b.dataset.v;
+    document.querySelectorAll(`.fbtn[data-f="${b.dataset.f}"]`).forEach(x=>x.setAttribute('aria-pressed',x===b));
+    render();
+  }));
+  $('#taskList').addEventListener('change',async e=>{
+    const id=e.target.dataset.id; if(!id)return; const on=e.target.checked; const key='t'+id;
+    if(on)ticks[key]=true; else delete ticks[key]; render();
+    if(db){ try{ await db.collection('ticks').doc(key).set({done:on,at:new Date().toISOString()}); }
+      catch(err){ $('#syncNote').textContent='Could not save that tick. You may have view-only access.'; } }
+    else{ try{localStorage.setItem('meo-ticks',JSON.stringify(ticks))}catch(e){} }
+  });
+  render();
+
+  (async()=>{
+    try{ db=window.claude&&window.claude.use?await window.claude.use('db'):null; }catch(e){db=null}
+    if(!db){ $('#syncNote').textContent='Ticks saved in this browser only'; $('#rsvpNote').textContent='Changes saved in this browser only'; $('#mtgNote').textContent='Notes saved in this browser only'; return; }
+    db.collection('meetings').onSnapshot(snap=>{
+      const m={}; snap.docs.forEach(d=>{const v=d.data(); if(v) m[d.id]=v;});
+      MTG=m; $('#mtgNote').textContent='Shared with the whole team'; if(!mtgEditing) renderMeetings();
+    },()=>{ $('#mtgNote').textContent='Shared notes unavailable right now'; });
+    db.collection('rsvp').onSnapshot(snap=>{
+      const r={}; snap.docs.forEach(d=>{const v=d.data(); if(v&&v.out)r[d.id]=true;});
+      rsvp=r; $('#rsvpNote').textContent='Shared with the whole team'; renderSched();
+    },()=>{ $('#rsvpNote').textContent='Shared updates unavailable right now'; });
+    db.collection('ticks').onSnapshot(snap=>{
+      const t={}; snap.docs.forEach(d=>{const v=d.data(); if(v&&v.done)t[d.id]=true;});
+      ticks=t; local=false; $('#syncNote').textContent='Ticks are shared with the whole team'; render();
+    },()=>{ $('#syncNote').textContent='Shared ticks unavailable right now'; });
+  })();
+})();
+</script>
+
+</body>
+</html>
