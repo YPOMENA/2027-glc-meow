@@ -810,11 +810,13 @@ const SUPABASE_KEY = 'sb_publishable_dukb24tfoznTtdsoDc8x_w_roDfMAHM';
   // collection(name).onSnapshot(cb,err). Reads the hub_docs table; writes go through the hub_save
   // database function. Refreshes every 20s and when the tab regains focus.
   function supaDb(url,key){
-    const H={apikey:key,'Content-Type':'application/json'}; const subs={}; let timer=null;
+    const H={apikey:key,'Content-Type':'application/json'}; const subs={}; let timer=null; let gen=0;
     async function refresh(){
+      const g=gen;
       try{
-        const r=await fetch(url+'/rest/v1/hub_docs?select=collection,id,data',{headers:H}); if(!r.ok) throw new Error('HTTP '+r.status);
+        const r=await fetch(url+'/rest/v1/hub_docs?select=collection,id,data',{headers:H,cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status);
         const rows=await r.json();
+        if(g!==gen) return; // a save happened while this was loading; a fresh load is already queued
         Object.keys(subs).forEach(name=>{ const docs=rows.filter(x=>x.collection===name).map(x=>({id:x.id,data:()=>x.data})); subs[name].forEach(s=>s.cb({docs})); });
       }catch(e){ Object.values(subs).flat().forEach(s=>s.err&&s.err(e)); }
     }
@@ -824,7 +826,7 @@ const SUPABASE_KEY = 'sb_publishable_dukb24tfoznTtdsoDc8x_w_roDfMAHM';
     async function save(collection,id,data){
       const r=await fetch(url+'/rest/v1/rpc/hub_save',{method:'POST',headers:H,body:JSON.stringify({p_collection:collection,p_id:id,p_data:data})});
       if(!r.ok) throw new Error(await r.text());
-      soon();
+      gen++; soon();
     }
     return { collection:name=>({
       onSnapshot(cb,err){ (subs[name]=subs[name]||[]).push({cb,err}); soon(); },
