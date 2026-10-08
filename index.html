@@ -546,6 +546,7 @@ const SUPABASE_KEY = 'sb_publishable_dukb24tfoznTtdsoDc8x_w_roDfMAHM';
     ['plan','Design the Experience','Nov','Design the participant experience','2026-11-01','2026-11-30'],
     ['plan','Build the Materials','Dec · done by late Dec','Develop workshop materials; all final before the Christmas break','2026-12-01','2026-12-23'],
     ['plan','Prepare to Launch','Jan–early Mar','Review, rehearse and finalise logistics','2027-01-04','2027-03-12'],
+    ['plan','Rehearse with JD','Feb · date TBC','Rehearse the workshop with JD','2027-02-01','2027-02-28'],
     ['deliver','GLC Bangkok','15–16 Mar','Deliver and gather insights','2027-03-13','2027-03-16',1],
     ['deliver','Virtual Workshops','Late Mar–Jun','Refine through virtual delivery','2027-03-17','2027-06-30'],
     ['deliver','GLC San Diego','3–4 May','Deliver at scale','2027-05-01','2027-05-04',1]
@@ -553,7 +554,7 @@ const SUPABASE_KEY = 'sb_publishable_dukb24tfoznTtdsoDc8x_w_roDfMAHM';
   const D=x=>new Date(x+'T00:00:00');
   let cur=null;
   $('#cycle').innerHTML=STAGES.map(st=>{
-    const done=today>D(st[5]); const now=!done&&today>=D(st[4]); if(now&&!cur)cur=st;
+    const done=today>D(st[5]); const now=!done&&today>=D(st[4])&&!cur; if(now&&!cur)cur=st;
     return `<li class="p-${st[0]}${done?' done':''}${now?' now':''}${st[6]?' glc':''}"><span class="dot"></span><div class="when">${esc(st[2])}</div><div class="what">${esc(st[1])}</div><div class="det">${esc(st[3])}</div>${now?'<span class="nowtag">We are here</span>':''}</li>`;
   }).join('');
   $('#cycleNow').innerHTML=cur?`<b>Now: ${esc(cur[1])}.</b> ${esc(cur[3])}.`:'';
@@ -761,6 +762,8 @@ const SUPABASE_KEY = 'sb_publishable_dukb24tfoznTtdsoDc8x_w_roDfMAHM';
     [12,'Logistical','Coordinate and communicate with resources','Jennifer','Mandi','Finding Resources',0],
     [13,'Logistical','Point of contact for room set and AV requirements','Shared','All four','Onsite Logistics',0,'Decide who connects to the projector; alternate by location'],
     [14,'Logistical','Schedule and manage onsite workshop rehearsals','TBC','','WDT Planning & Readiness',0,'Split between Cohorts A and B'],
+    [46,'Logistical','Book a time with JD for the February rehearsal','TBC','','WDT Planning & Readiness',0,'Once booked, share the date so it can go on the Road to GLC'],
+    [47,'Logistical','Send JD the calendar invite and workshop materials ahead of the rehearsal','TBC','','WDT Planning & Readiness',0],
     [15,'Logistical','Analyse registration data and share insights with team','TBC','','Exec Summary',0,'Split between Cohorts A and B'],
     [16,'Logistical','Create a briefing doc for Champions about registered officers','TBC','','Exec Summary',0,'Split between Cohorts A and B'],
     [17,'Logistical','Create and manage seating chart','TBC','','Onsite Logistics',1,'Split between Cohorts A and B'],
