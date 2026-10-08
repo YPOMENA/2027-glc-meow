@@ -9,4 +9,8 @@ Static site, no build step.
 ## Updating
 Replace `index.html` with the new version and redeploy.
 
-Note: on Vercel, task ticks, "Can't make it" marks and meeting notes save in each viewer's own browser only.
+## Shared saving
+Task ticks, "Can't make it" marks and meeting notes save in each viewer's own browser until
+`SUPABASE_URL` and `SUPABASE_KEY` at the top of the script in `index.html` are filled in.
+Once they are, everything is shared for the whole team through Supabase.
+Step-by-step setup: [SETUP-SHARED-SAVING.md](SETUP-SHARED-SAVING.md). Database script: [supabase/setup.sql](supabase/setup.sql).
