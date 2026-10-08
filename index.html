@@ -231,7 +231,16 @@ table.sched td .sl{display:block;font-size:11px;font-weight:600;color:var(--gold
 .pill.ok{background:var(--green-soft);color:var(--green)}
 .mtg .mb{padding:0 22px 22px;display:grid;gap:16px}
 .mtg .mb h4{margin:0 0 6px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
-.mtg .notes-txt{white-space:pre-wrap;line-height:1.6;max-width:75ch}
+.mtg .notes-txt{line-height:1.6;max-width:75ch;overflow-wrap:anywhere}
+.mtg .notes-txt>*{margin:0 0 10px} .mtg .notes-txt>:last-child{margin-bottom:0}
+.mtg .notes-txt ul,.mtg .notes-txt ol{padding-left:22px;display:grid;gap:4px}
+.mtg .notes-txt h5{font-family:var(--display);font-size:15px;color:var(--blue);margin-top:14px}
+.mtg .notes-txt h5:first-child{margin-top:0}
+.fmtbar{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px}
+.fmtbar button{font:inherit;font-size:13px;min-width:34px;height:30px;padding:0 9px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);cursor:pointer}
+.fmtbar button:hover{background:var(--paper-2)}
+.fmtbar button:focus-visible{outline:2px solid var(--azure);outline-offset:1px}
+.fmthint{font-size:12px;color:var(--muted);margin:6px 0 0}
 .mtg .empty{padding:0;color:var(--muted);font-style:italic}
 .mtg textarea,.mtg input[type=url]{font:inherit;font-size:14px;width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--paper-2);color:var(--ink)}
 .mtg textarea{min-height:180px;resize:vertical}
@@ -610,6 +619,52 @@ footer b{color:var(--blue);font-family:var(--display)}
   try{rsvp=JSON.parse(localStorage.getItem('meo-rsvp')||'{}');renderSched();}catch(e){}
   // Meeting notes & recordings (shared via db when available)
   let MTG={}; let mtgEditing=null;
+  // Light formatting for notes: stored as plain text, rendered safely (escape first, then add tags)
+  function fmtInline(t){
+    return esc(t)
+      .replace(/\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>')
+      .replace(/(^|[\s(])(https?:\/\/[^\s<]*[^\s<.,;:!?)])/g,'$1<a href="$2" target="_blank" rel="noopener">$2</a>')
+      .replace(/\*\*(?=\S)(.+?)\*\*/g,'<strong>$1</strong>')
+      .replace(/(^|[^\w*])\*(?=\S)([^*]+?)\*(?![\w*])/g,'$1<em>$2</em>');
+  }
+  function fmtNotes(src){
+    const out=[]; let list=null, para=[];
+    const flushP=()=>{ if(para.length){ out.push('<p>'+para.join('<br>')+'</p>'); para=[]; } };
+    const flushL=()=>{ if(list){ out.push(`<${list.tag}>${list.items.map(x=>'<li>'+x+'</li>').join('')}</${list.tag}>`); list=null; } };
+    String(src).replace(/\r\n?/g,'\n').split('\n').forEach(line=>{
+      let m;
+      if((m=line.match(/^\s*[-*•]\s+(.*)$/))||(m=line.match(/^\s*\d+[.)]\s+(.*)$/))){
+        const tag=/^\s*\d/.test(line)?'ol':'ul'; flushP(); if(list&&list.tag!==tag) flushL();
+        if(!list) list={tag,items:[]}; list.items.push(fmtInline(m[1])); return;
+      }
+      flushL();
+      if((m=line.match(/^\s*#{1,6}\s+(.*)$/))){ flushP(); out.push('<h5>'+fmtInline(m[1])+'</h5>'); return; }
+      if(!line.trim()){ flushP(); return; }
+      para.push(fmtInline(line));
+    });
+    flushL(); flushP(); return out.join('');
+  }
+  function fmtApply(ta,kind){
+    ta.focus();
+    const v=ta.value; let a=ta.selectionStart, b=ta.selectionEnd; const sel=v.slice(a,b);
+    let ins, selFrom, selTo;
+    if(kind==='b'||kind==='i'){
+      const mk=kind==='b'?'**':'*'; const txt=sel||(kind==='b'?'bold text':'italic text');
+      ins=mk+txt+mk; selFrom=a+mk.length; selTo=selFrom+txt.length;
+    } else if(kind==='a'){
+      const url=prompt('Link address (https://…)','https://'); if(!url||!/^https?:\/\/\S+$/i.test(url.trim())) return;
+      const txt=sel||'link text'; ins='['+txt+']('+url.trim()+')'; selFrom=a+1; selTo=selFrom+txt.length;
+    } else {
+      a=v.lastIndexOf('\n',a-1)+1; const e=v.indexOf('\n',b>a&&v[b-1]==='\n'?b-1:b); b=e<0?v.length:e;
+      const lines=v.slice(a,b).split('\n'); let n=0;
+      ins=lines.map(l=>{ const t=l.replace(/^\s*(?:[-*•]|\d+[.)]|#{1,6})\s+/,''); return kind==='h'?'## '+t:kind==='ul'?'- '+t:(++n)+'. '+t; }).join('\n');
+      selFrom=a+ins.length; selTo=selFrom;
+    }
+    ta.setSelectionRange(a,b);
+    let ok=false; try{ ok=document.execCommand('insertText',false,ins); }catch(e){}
+    if(!ok||ta.value.slice(a,a+ins.length)!==ins) ta.setRangeText(ins,a,b,'end');
+    ta.setSelectionRange(selFrom,selTo);
+  }
   function renderMeetings(){
     const list=$('#mtgList'); if(!list) return;
     list.innerHTML=CALLS.map((c,i)=>{
@@ -617,17 +672,19 @@ footer b{color:var(--blue);font-family:var(--display)}
       const dubai=new Date(c.start).toLocaleString('en-GB',{timeZone:'Asia/Dubai',weekday:'short',day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true});
       const pills=(m.notes?'<span class="pill ok">Notes</span>':'')+(m.recording?'<span class="pill ok">Recording</span>':'')+(!past?'<span class="pill proj">Upcoming</span>':(!m.notes?'<span class="pill soon">Notes to add</span>':''));
       const open=ed||i===nextIdx||(past&&i===nextIdx-1)||(nextIdx<0&&i===CALLS.length-1);
-      const body=ed?`<div><h4>Notes, decisions &amp; actions</h4><textarea id="mn-${c.id}" placeholder="Attendees, key decisions, actions with owners and dates…">${esc(m.notes||'')}</textarea></div>
+      const body=ed?`<div><h4>Notes, decisions &amp; actions</h4><div class="fmtbar" role="toolbar" aria-label="Formatting" data-for="mn-${c.id}"><button type="button" data-fmt="b" title="Bold (Ctrl/⌘+B)" aria-label="Bold"><b>B</b></button><button type="button" data-fmt="i" title="Italic (Ctrl/⌘+I)" aria-label="Italic"><i>I</i></button><button type="button" data-fmt="h" title="Heading" aria-label="Heading">H</button><button type="button" data-fmt="ul" title="Bulleted list" aria-label="Bulleted list">• List</button><button type="button" data-fmt="ol" title="Numbered list" aria-label="Numbered list">1. List</button><button type="button" data-fmt="a" title="Link" aria-label="Link">Link</button></div><textarea id="mn-${c.id}" placeholder="Attendees, key decisions, actions with owners and dates…">${esc(m.notes||'')}</textarea><p class="fmthint">Formatting: **bold**, *italic*, # heading, lines starting with - or 1. become lists, [text](https://…) for links.</p></div>
         <div><h4>Recording link</h4><input type="url" id="mr-${c.id}" placeholder="https://ypo.zoom.us/rec/…" value="${esc(m.recording||'')}"></div>
         <div class="btnrow"><button class="btn primary" data-act="save" data-id="${c.id}">Save</button><button class="btn" data-act="cancel">Cancel</button><span class="sync" id="ms-${c.id}"></span></div>`
        :`${c.agenda?`<div><h4>Agenda</h4><ol class="slots" style="margin:0">${c.agenda.map(a=>`<li>${esc(a)}</li>`).join('')}</ol></div>`:''}
-        <div><h4>Notes, decisions &amp; actions</h4>${m.notes?`<div class="notes-txt">${esc(m.notes)}</div>`:`<p class="empty">${past?'No notes added yet.':'Add notes after the call.'}</p>`}</div>
+        <div><h4>Notes, decisions &amp; actions</h4>${m.notes?`<div class="notes-txt">${fmtNotes(m.notes)}</div>`:`<p class="empty">${past?'No notes added yet.':'Add notes after the call.'}</p>`}</div>
         <div><h4>Recording</h4>${m.recording?`<a href="${esc(m.recording)}" target="_blank" rel="noopener">Watch the recording</a>`:'<p class="empty">No recording link yet.</p>'}</div>
         <div class="btnrow"><button class="btn" data-act="edit" data-id="${c.id}">${m.notes||m.recording?'Edit':'Add notes &amp; recording'}</button>${m.at?`<span class="sync">Last updated ${new Date(m.at).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</span>`:''}</div>`;
       return `<details class="mtg"${open?' open':''}><summary><span class="mt">${esc(c.title||'Content team call')} · ${esc(c.label)}</span><span class="mpills">${pills}</span><span class="ms">${esc(dubai)} Dubai · Slot ${esc(c.slot)}</span></summary><div class="mb">${body}</div></details>`;
     }).join('');
   }
   $('#mtgList').addEventListener('click',async e=>{
+    const f=e.target.closest('button[data-fmt]');
+    if(f){ const ta=document.getElementById(f.closest('.fmtbar').dataset.for); if(ta) fmtApply(ta,f.dataset.fmt); return; }
     const b=e.target.closest('button[data-act]'); if(!b) return; const act=b.dataset.act;
     if(act==='edit'){mtgEditing=b.dataset.id; renderMeetings(); const t=document.getElementById('mn-'+mtgEditing); if(t)t.focus(); return;}
     if(act==='cancel'){mtgEditing=null; renderMeetings(); return;}
@@ -640,6 +697,10 @@ footer b{color:var(--blue);font-family:var(--display)}
       else { try{const all=JSON.parse(localStorage.getItem('meo-mtg')||'{}'); all[id]=doc; localStorage.setItem('meo-mtg',JSON.stringify(all));}catch(e){} }
       MTG[id]=doc; mtgEditing=null; renderMeetings();
     }
+  });
+  $('#mtgList').addEventListener('keydown',e=>{
+    if(e.target.tagName!=='TEXTAREA'||!(e.ctrlKey||e.metaKey)||e.altKey||e.shiftKey) return;
+    const k=e.key.toLowerCase(); if(k==='b'||k==='i'){ e.preventDefault(); fmtApply(e.target,k); }
   });
   try{MTG=JSON.parse(localStorage.getItem('meo-mtg')||'{}')}catch(e){}
   renderMeetings();
