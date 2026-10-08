@@ -506,6 +506,13 @@ footer b{color:var(--blue);font-family:var(--display)}
 </main>
 
 <script>
+// ── Shared saving (Supabase) ─────────────────────────────────────────────
+// Paste your Supabase Project URL and publishable (anon) key here.
+// Both are safe to be public. Never paste the secret / service_role key.
+// Leave them empty and everything saves in each person's own browser only.
+const SUPABASE_URL = 'https://aimydzuynnzumnaehiqi.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_dukb24tfoznTtdsoDc8x_w_roDfMAHM';
+// ─────────────────────────────────────────────────────────────────────────
 (function(){
   const $=s=>document.querySelector(s);
   const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -613,7 +620,7 @@ footer b{color:var(--blue);font-family:var(--display)}
   $('#sched').addEventListener('click',async e=>{
     const b=e.target.closest('button.cell'); if(!b||b.disabled)return; const k=b.dataset.k; const out=!rsvp[k];
     if(out)rsvp[k]=true; else delete rsvp[k]; renderSched();
-    if(db){try{await db.collection('rsvp').doc(k).set({out,at:new Date().toISOString()});}catch(err){$('#rsvpNote').textContent='Could not save that change. You may have view-only access.';}}
+    if(db){try{await db.collection('rsvp').doc(k).set({out,at:new Date().toISOString()});}catch(err){$('#rsvpNote').textContent='Could not save that change. Check your connection and try again.';}}
     else{try{localStorage.setItem('meo-rsvp',JSON.stringify(rsvp))}catch(e){}}
   });
   try{rsvp=JSON.parse(localStorage.getItem('meo-rsvp')||'{}');renderSched();}catch(e){}
@@ -697,7 +704,7 @@ footer b{color:var(--blue);font-family:var(--display)}
       const st=document.getElementById('ms-'+id);
       if(rec && !/^https?:\/\//i.test(rec)){st.textContent='The recording link needs to start with https://';return;}
       const doc={recording:rec,at:new Date().toISOString()}; NOTE_PARTS.forEach(([k])=>doc[k]=document.getElementById('mn-'+k+'-'+id).value.trim());
-      if(db){ try{ b.disabled=true; st.textContent='Saving…'; await db.collection('meetings').doc(id).set(doc); }catch(err){ b.disabled=false; st.textContent='Could not save. You may have view-only access.'; return; } }
+      if(db){ try{ b.disabled=true; st.textContent='Saving…'; await db.collection('meetings').doc(id).set(doc); }catch(err){ b.disabled=false; st.textContent='Could not save. Check your connection and try again.'; return; } }
       else { try{const all=JSON.parse(localStorage.getItem('meo-mtg')||'{}'); all[id]=doc; localStorage.setItem('meo-mtg',JSON.stringify(all));}catch(e){} }
       MTG[id]=doc; mtgEditing=null; renderMeetings();
     }
@@ -793,6 +800,31 @@ footer b{color:var(--blue);font-family:var(--display)}
   const GROUPS=['Planning','Logistical','Communication','Relational'];
   const NUM={}; let _n=0; GROUPS.forEach(g=>T.filter(t=>t[1]===g).forEach(t=>{NUM[t[0]]=++_n;}));
   let ticks={}; const f={state:'open',who:'all'}; let db=null; let local=true;
+  // Supabase adapter with the same shape as the claude db: collection(name).doc(id).set(data) and
+  // collection(name).onSnapshot(cb,err). Reads the hub_docs table; writes go through the hub_save
+  // database function. Refreshes every 20s and when the tab regains focus.
+  function supaDb(url,key){
+    const H={apikey:key,'Content-Type':'application/json'}; const subs={}; let timer=null;
+    async function refresh(){
+      try{
+        const r=await fetch(url+'/rest/v1/hub_docs?select=collection,id,data',{headers:H}); if(!r.ok) throw new Error('HTTP '+r.status);
+        const rows=await r.json();
+        Object.keys(subs).forEach(name=>{ const docs=rows.filter(x=>x.collection===name).map(x=>({id:x.id,data:()=>x.data})); subs[name].forEach(s=>s.cb({docs})); });
+      }catch(e){ Object.values(subs).flat().forEach(s=>s.err&&s.err(e)); }
+    }
+    const soon=()=>{ clearTimeout(timer); timer=setTimeout(refresh,50); };
+    setInterval(refresh,20000);
+    document.addEventListener('visibilitychange',()=>{ if(!document.hidden) refresh(); });
+    async function save(collection,id,data){
+      const r=await fetch(url+'/rest/v1/rpc/hub_save',{method:'POST',headers:H,body:JSON.stringify({p_collection:collection,p_id:id,p_data:data})});
+      if(!r.ok) throw new Error(await r.text());
+      soon();
+    }
+    return { collection:name=>({
+      onSnapshot(cb,err){ (subs[name]=subs[name]||[]).push({cb,err}); soon(); },
+      doc:id=>({ set:data=>save(name,id,data) })
+    })};
+  }
   try{ticks=JSON.parse(localStorage.getItem('meo-ticks')||'{}')}catch(e){}
 
   function matchWho(t){ if(f.who==='all')return true; return t[3]===f.who||coOwner[t[0]]===f.who; }
@@ -822,13 +854,14 @@ footer b{color:var(--blue);font-family:var(--display)}
     const id=e.target.dataset.id; if(!id)return; const on=e.target.checked; const key='t'+id;
     if(on)ticks[key]=true; else delete ticks[key]; render();
     if(db){ try{ await db.collection('ticks').doc(key).set({done:on,at:new Date().toISOString()}); }
-      catch(err){ $('#syncNote').textContent='Could not save that tick. You may have view-only access.'; } }
+      catch(err){ $('#syncNote').textContent='Could not save that tick. Check your connection and try again.'; } }
     else{ try{localStorage.setItem('meo-ticks',JSON.stringify(ticks))}catch(e){} }
   });
   render();
 
   (async()=>{
-    try{ db=window.claude&&window.claude.use?await window.claude.use('db'):null; }catch(e){db=null}
+    if(SUPABASE_URL&&SUPABASE_KEY) db=supaDb(SUPABASE_URL.replace(/\/+$/,''),SUPABASE_KEY);
+    else { try{ db=window.claude&&window.claude.use?await window.claude.use('db'):null; }catch(e){db=null} }
     if(!db){ $('#syncNote').textContent='Ticks saved in this browser only'; $('#rsvpNote').textContent='Changes saved in this browser only'; $('#mtgNote').textContent='Notes saved in this browser only'; return; }
     db.collection('meetings').onSnapshot(snap=>{
       const m={}; snap.docs.forEach(d=>{const v=d.data(); if(v) m[d.id]=v;});
