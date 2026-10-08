@@ -8,12 +8,11 @@ About 15 minutes. You don't need to write any code.
 ## What you're building
 
 ```
-Teammate's browser ──reads──▶  Supabase table "hub_docs"  (anyone with the site can read)
-Teammate's browser ──saves──▶  hub_save + team passcode   (only people who know the passcode can change things)
+Teammate's browser ──reads──▶  Supabase table "hub_docs"
+Teammate's browser ──saves──▶  hub_save function  ──▶  hub_docs
 ```
 
-- **Reading** is open to anyone who has the site link, same as the rest of the page.
-- **Saving** asks for a **team passcode** the first time. The browser remembers it after that.
+- **Anyone with the site link can read and save.** There's no login or passcode, so keep the link within the team.
 
 ---
 
@@ -37,18 +36,14 @@ Teammate's browser ──saves──▶  hub_save + team passcode   (only people
 1. In the left sidebar, open **SQL Editor** (the `>_` icon).
 2. Click **+ New query**.
 3. Open [`supabase/setup.sql`](supabase/setup.sql) from this repo, copy **all** of it and paste it into the editor.
-4. Near the bottom, replace `CHANGE-ME-TO-YOUR-TEAM-PASSCODE` with the passcode your team will use.
-   Pick something not easy to guess, at least 12 characters, for example `glc27-meow-blue-falcon`.
-   Keep the single quotes around it.
-5. Click **Run** (or Ctrl/⌘+Enter). You should see **Success. No rows returned**.
+4. Click **Run** (or Ctrl/⌘+Enter). You should see **Success. No rows returned**.
 
 **What that script did, in plain English:**
 - Made a table called `hub_docs` that stores every note, tick and "Can't make it" mark.
-- Allowed anyone to *read* that table, and nobody to write to it directly.
-- Stored your passcode in a separate table the website can't see.
-- Created a `hub_save` function: the only way to save, and it checks the passcode first.
+- Allowed anyone to *read* that table, and blocked writing to it directly.
+- Created a `hub_save` function: the only way to save, and it only accepts the hub's own kinds of data.
 
-To check: in the sidebar open **Table Editor**. You should see `hub_docs` (empty for now) and `hub_settings`.
+To check: in the sidebar open **Table Editor**. You should see `hub_docs` (empty for now).
 
 ## Step 3: Copy your two connection values
 
@@ -60,7 +55,7 @@ To check: in the sidebar open **Table Editor**. You should see `hub_docs` (empty
    - **Publishable key**: starts with `sb_publishable_…`. On older projects it's called the
      **anon public** key and is a long string starting with `eyJ…`.
 
-> ✅ These two are **meant to be public**. They go inside the web page, and the passcode protects saving.
+> ✅ These two are **meant to be public**. They go inside the web page.
 >
 > ⛔ **Never** copy the **secret** key (`sb_secret_…`) or the **service_role** key. They bypass all
 > the protections and must not go into the page or be sent to anyone.
@@ -93,30 +88,27 @@ You can do this in either of two ways:
 2. Open the site and go to **Meeting notes & recordings**. Next to the heading it should now say
    **"Shared with the whole team"**. If it still says *"saved in this browser only"*, the new
    version isn't deployed yet.
-3. Add a note to a call and click **Save**. It asks for the team passcode once. Enter it.
+3. Add a note to a call and click **Save**.
 4. Open the site on your phone or in a private window. Your note should be there.
 5. In Supabase **Table Editor → hub_docs** you'll see the row you just saved.
 
 ## Step 6: Tell the team
 
-Send them the site link and the passcode, through Teams or another private channel and not in the
-site itself. Each person enters the passcode the first time they save something.
+Share the site link with the team privately, for example in Teams. Anyone who has the link can add
+and change notes, so don't post it publicly.
 
 ---
 
 ## Good to know
 
-- **Changing the passcode:** in the SQL Editor, run
-  `update hub_settings set value = 'new-passcode' where name = 'passcode';`
-  Everyone is asked for the new one the next time they save.
 - **Updates from others** appear within about 20 seconds, or straight away when you switch back to the tab.
 - **Two people editing the same call's notes at once:** whoever clicks Save last wins. Agree on one
   note-taker per call.
 - **Notes saved before this setup** stay in that person's browser and don't move across automatically.
   Copy them into the hub again after the switch.
 - **Backup / export:** Supabase **Table Editor → hub_docs → Export → CSV**.
-- **Who can read:** anyone with the site link can read the notes, the same as the rest of the page.
-  Don't put anything in notes you wouldn't put on the page itself.
+- **Who can read and edit:** anyone with the site link. Don't put anything in notes you wouldn't put
+  on the page itself. If you later want to lock down editing, ask Claude to add a passcode or sign-in.
 
 ## Troubleshooting
 
@@ -124,5 +116,4 @@ site itself. Each person enters the passcode the first time they save something.
 |---|---|
 | "Notes saved in this browser only" | `SUPABASE_URL` / `SUPABASE_KEY` are still empty in the deployed page |
 | "Shared notes unavailable right now" | Wrong URL or key, the setup script wasn't run, or the project is paused (open Supabase → Restore) |
-| "That passcode is not right" | Typo, or the passcode was changed. Ask the team lead |
-| "Could not save… Check the team passcode" | Same as above, or no internet connection |
+| "Could not save… Check your connection" | No internet connection, or the setup script wasn't run |

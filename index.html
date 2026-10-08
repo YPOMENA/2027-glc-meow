@@ -620,7 +620,7 @@ const SUPABASE_KEY = '';
   $('#sched').addEventListener('click',async e=>{
     const b=e.target.closest('button.cell'); if(!b||b.disabled)return; const k=b.dataset.k; const out=!rsvp[k];
     if(out)rsvp[k]=true; else delete rsvp[k]; renderSched();
-    if(db){try{await db.collection('rsvp').doc(k).set({out,at:new Date().toISOString()});}catch(err){$('#rsvpNote').textContent='Could not save that change. Check the team passcode and your connection.';}}
+    if(db){try{await db.collection('rsvp').doc(k).set({out,at:new Date().toISOString()});}catch(err){$('#rsvpNote').textContent='Could not save that change. Check your connection and try again.';}}
     else{try{localStorage.setItem('meo-rsvp',JSON.stringify(rsvp))}catch(e){}}
   });
   try{rsvp=JSON.parse(localStorage.getItem('meo-rsvp')||'{}');renderSched();}catch(e){}
@@ -704,7 +704,7 @@ const SUPABASE_KEY = '';
       const st=document.getElementById('ms-'+id);
       if(rec && !/^https?:\/\//i.test(rec)){st.textContent='The recording link needs to start with https://';return;}
       const doc={recording:rec,at:new Date().toISOString()}; NOTE_PARTS.forEach(([k])=>doc[k]=document.getElementById('mn-'+k+'-'+id).value.trim());
-      if(db){ try{ b.disabled=true; st.textContent='Saving…'; await db.collection('meetings').doc(id).set(doc); }catch(err){ b.disabled=false; st.textContent='Could not save. Check the team passcode and your connection.'; return; } }
+      if(db){ try{ b.disabled=true; st.textContent='Saving…'; await db.collection('meetings').doc(id).set(doc); }catch(err){ b.disabled=false; st.textContent='Could not save. Check your connection and try again.'; return; } }
       else { try{const all=JSON.parse(localStorage.getItem('meo-mtg')||'{}'); all[id]=doc; localStorage.setItem('meo-mtg',JSON.stringify(all));}catch(e){} }
       MTG[id]=doc; mtgEditing=null; renderMeetings();
     }
@@ -802,7 +802,7 @@ const SUPABASE_KEY = '';
   let ticks={}; const f={state:'open',who:'all'}; let db=null; let local=true;
   // Supabase adapter with the same shape as the claude db: collection(name).doc(id).set(data) and
   // collection(name).onSnapshot(cb,err). Reads the hub_docs table; writes go through the hub_save
-  // function, which checks the team passcode. Refreshes every 20s and when the tab regains focus.
+  // database function. Refreshes every 20s and when the tab regains focus.
   function supaDb(url,key){
     const H={apikey:key,'Content-Type':'application/json'}; const subs={}; let timer=null;
     async function refresh(){
@@ -815,16 +815,9 @@ const SUPABASE_KEY = '';
     const soon=()=>{ clearTimeout(timer); timer=setTimeout(refresh,50); };
     setInterval(refresh,20000);
     document.addEventListener('visibilitychange',()=>{ if(!document.hidden) refresh(); });
-    async function save(collection,id,data,retry){
-      let pass=null; try{pass=localStorage.getItem('meo-pass')}catch(e){}
-      if(!pass){ pass=prompt('Enter the team passcode to save changes for everyone:'); if(!pass) throw new Error('No passcode'); }
-      const r=await fetch(url+'/rest/v1/rpc/hub_save',{method:'POST',headers:H,body:JSON.stringify({p_passcode:pass,p_collection:collection,p_id:id,p_data:data})});
-      if(!r.ok){
-        const msg=await r.text();
-        if(/wrong passcode/i.test(msg)){ try{localStorage.removeItem('meo-pass')}catch(e){} if(!retry){ alert('That passcode is not right. Please try again.'); return save(collection,id,data,true); } }
-        throw new Error(msg);
-      }
-      try{localStorage.setItem('meo-pass',pass)}catch(e){}
+    async function save(collection,id,data){
+      const r=await fetch(url+'/rest/v1/rpc/hub_save',{method:'POST',headers:H,body:JSON.stringify({p_collection:collection,p_id:id,p_data:data})});
+      if(!r.ok) throw new Error(await r.text());
       soon();
     }
     return { collection:name=>({
@@ -861,7 +854,7 @@ const SUPABASE_KEY = '';
     const id=e.target.dataset.id; if(!id)return; const on=e.target.checked; const key='t'+id;
     if(on)ticks[key]=true; else delete ticks[key]; render();
     if(db){ try{ await db.collection('ticks').doc(key).set({done:on,at:new Date().toISOString()}); }
-      catch(err){ $('#syncNote').textContent='Could not save that tick. Check the team passcode and your connection.'; } }
+      catch(err){ $('#syncNote').textContent='Could not save that tick. Check your connection and try again.'; } }
     else{ try{localStorage.setItem('meo-ticks',JSON.stringify(ticks))}catch(e){} }
   });
   render();
