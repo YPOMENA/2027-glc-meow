@@ -242,7 +242,12 @@ table.sched td .sl{display:block;font-size:11px;font-weight:600;color:var(--gold
 .fmtbar button:focus-visible{outline:2px solid var(--azure);outline-offset:1px}
 .fmthint{font-size:12px;color:var(--muted);margin:6px 0 0}
 .mtg .empty{padding:0;color:var(--muted);font-style:italic}
-.mtg textarea,.mtg input[type=url]{font:inherit;font-size:14px;width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--paper-2);color:var(--ink)}
+.mtg .recrow{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:12px}
+@media (max-width:600px){.mtg .recrow{grid-template-columns:1fr}}
+.mtg .pcode{margin-top:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:14px}
+.mtg .pcode code{font-size:14px;background:var(--paper-2);border:1px solid var(--line);border-radius:6px;padding:2px 8px}
+.btn.sm{font-size:12px;padding:4px 10px}
+.mtg textarea,.mtg input[type=url],.mtg input[type=text]{font:inherit;font-size:14px;width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--paper-2);color:var(--ink)}
 .mtg textarea{min-height:120px;resize:vertical}
 .mtg textarea:focus,.mtg input:focus{outline:2px solid var(--azure);outline-offset:1px}
 .btnrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
@@ -684,11 +689,11 @@ const SUPABASE_KEY = 'sb_publishable_dukb24tfoznTtdsoDc8x_w_roDfMAHM';
       const pills=(hasNotes(m)?'<span class="pill ok">Notes</span>':'')+(m.recording?'<span class="pill ok">Recording</span>':'')+(!past?'<span class="pill proj">Upcoming</span>':(!hasNotes(m)?'<span class="pill soon">Notes to add</span>':''));
       const open=ed||i===nextIdx||(past&&i===nextIdx-1)||(nextIdx<0&&i===CALLS.length-1);
       const body=ed?`${NOTE_PARTS.map(([k,h,ph])=>`<div><h4><label for="mn-${k}-${c.id}">${h}</label></h4><div class="fmtbar" role="toolbar" aria-label="Formatting for ${h}" data-for="mn-${k}-${c.id}"><button type="button" data-fmt="b" title="Bold (Ctrl/⌘+B)" aria-label="Bold"><b>B</b></button><button type="button" data-fmt="i" title="Italic (Ctrl/⌘+I)" aria-label="Italic"><i>I</i></button><button type="button" data-fmt="h" title="Heading" aria-label="Heading">H</button><button type="button" data-fmt="ul" title="Bulleted list" aria-label="Bulleted list">• List</button><button type="button" data-fmt="ol" title="Numbered list" aria-label="Numbered list">1. List</button><button type="button" data-fmt="a" title="Link" aria-label="Link">Link</button></div><textarea id="mn-${k}-${c.id}" placeholder="${ph}">${esc(noteVal(m,k))}</textarea></div>`).join('')}<p class="fmthint">Formatting: **bold**, *italic*, # heading, lines starting with - or 1. become lists, [text](https://…) for links.</p>
-        <div><h4>Recording link</h4><input type="url" id="mr-${c.id}" placeholder="https://ypo.zoom.us/rec/…" value="${esc(m.recording||'')}"></div>
+        <div class="recrow"><div><h4><label for="mr-${c.id}">Recording link</label></h4><input type="url" id="mr-${c.id}" placeholder="https://ypo.zoom.us/rec/…" value="${esc(m.recording||'')}"></div><div><h4><label for="mp-${c.id}">Recording passcode</label></h4><input type="text" id="mp-${c.id}" placeholder="If the recording has one" autocomplete="off" value="${esc(m.passcode||'')}"></div></div>
         <div class="btnrow"><button class="btn primary" data-act="save" data-id="${c.id}">Save</button><button class="btn" data-act="cancel">Cancel</button><span class="sync" id="ms-${c.id}"></span></div>`
        :`${c.agenda?`<div><h4>Agenda</h4><ol class="slots" style="margin:0">${c.agenda.map(a=>`<li>${esc(a)}</li>`).join('')}</ol></div>`:''}
         ${NOTE_PARTS.map(([k,h])=>`<div><h4>${h}</h4>${noteVal(m,k)?`<div class="notes-txt">${fmtNotes(noteVal(m,k))}</div>`:`<p class="empty">${!hasNotes(m)&&!past?'Add after the call.':'Nothing added yet.'}</p>`}</div>`).join('')}
-        <div><h4>Recording</h4>${m.recording?`<a href="${esc(m.recording)}" target="_blank" rel="noopener">Watch the recording</a>`:'<p class="empty">No recording link yet.</p>'}</div>
+        <div><h4>Recording</h4>${m.recording?`<a href="${esc(m.recording)}" target="_blank" rel="noopener">Watch the recording</a>${m.passcode?`<div class="pcode">Passcode: <code>${esc(m.passcode)}</code><button type="button" class="btn sm" data-act="copy" data-code="${esc(m.passcode)}">Copy</button></div>`:''}`:'<p class="empty">No recording link yet.</p>'}</div>
         <div class="btnrow"><button class="btn" data-act="edit" data-id="${c.id}">${hasNotes(m)||m.recording?'Edit':'Add notes &amp; recording'}</button>${m.at?`<span class="sync">Last updated ${new Date(m.at).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</span>`:''}</div>`;
       return `<details class="mtg"${open?' open':''}><summary><span class="mt">${esc(c.title||'Content team call')} · ${esc(c.label)}</span><span class="mpills">${pills}</span><span class="ms">${esc(dubai)} Dubai · Slot ${esc(c.slot)}</span></summary><div class="mb">${body}</div></details>`;
     }).join('');
@@ -698,12 +703,13 @@ const SUPABASE_KEY = 'sb_publishable_dukb24tfoznTtdsoDc8x_w_roDfMAHM';
     if(f){ const ta=document.getElementById(f.closest('.fmtbar').dataset.for); if(ta) fmtApply(ta,f.dataset.fmt); return; }
     const b=e.target.closest('button[data-act]'); if(!b) return; const act=b.dataset.act;
     if(act==='edit'){mtgEditing=b.dataset.id; renderMeetings(); const t=document.getElementById('mn-discussion-'+mtgEditing); if(t)t.focus(); return;}
+    if(act==='copy'){ const done=()=>{b.textContent='Copied'; setTimeout(()=>b.textContent='Copy',1500);}; try{ await navigator.clipboard.writeText(b.dataset.code); done(); }catch(err){ prompt('Copy the passcode:',b.dataset.code); } return; }
     if(act==='cancel'){mtgEditing=null; renderMeetings(); return;}
     if(act==='save'){
       const id=b.dataset.id; let rec=document.getElementById('mr-'+id).value.trim();
       const st=document.getElementById('ms-'+id);
       if(rec && !/^https?:\/\//i.test(rec)){st.textContent='The recording link needs to start with https://';return;}
-      const doc={recording:rec,at:new Date().toISOString()}; NOTE_PARTS.forEach(([k])=>doc[k]=document.getElementById('mn-'+k+'-'+id).value.trim());
+      const doc={recording:rec,passcode:document.getElementById('mp-'+id).value.trim(),at:new Date().toISOString()}; NOTE_PARTS.forEach(([k])=>doc[k]=document.getElementById('mn-'+k+'-'+id).value.trim());
       if(db){ try{ b.disabled=true; st.textContent='Saving…'; await db.collection('meetings').doc(id).set(doc); }catch(err){ b.disabled=false; st.textContent='Could not save. Check your connection and try again.'; return; } }
       else { try{const all=JSON.parse(localStorage.getItem('meo-mtg')||'{}'); all[id]=doc; localStorage.setItem('meo-mtg',JSON.stringify(all));}catch(e){} }
       MTG[id]=doc; mtgEditing=null; renderMeetings();
