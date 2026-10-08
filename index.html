@@ -340,13 +340,7 @@ footer b{color:var(--blue);font-family:var(--display)}
       </div>
     </div>
     <div class="card">
-      <div class="sec-head" style="margin-bottom:6px"><h3 style="font-size:17px">Who can make which call</h3><span class="sync" id="rsvpNote">Loading…</span></div>
-      <p class="muted" style="margin:0 0 12px;font-size:14px">Each person's local day and time. Tap a time to mark that person as unable to attend; tap again to undo.</p>
-      <div class="tbl-wrap"><table class="sched" id="sched"></table></div>
-      <div class="key">
-        <span><i class="k ok"></i>Can attend</span><span><i class="k odd"></i>Very early or late locally</span><span><i class="k maybe"></i>Maybe</span><span><i class="k out"></i>Can't make it</span>
-      </div>
-      <div class="ooo">
+      <div>
         <div class="eyebrow" style="margin-bottom:8px">Out of office &amp; travel</div>
         <div class="chips small">
           <span class="chip"><b>Niloma</b> · 16–23 Oct, 26–27 Nov</span>
@@ -611,7 +605,7 @@ const SUPABASE_KEY = 'sb_publishable_dukb24tfoznTtdsoDc8x_w_roDfMAHM';
         return `<td class="${isPast(c)?'past':''}"><button type="button" class="${cls}" data-k="${c.id}-${p[0]}" ${s.fixed||isPast(c)?'disabled':''} aria-pressed="${s.out}" aria-label="${esc(p[1])}, ${esc(c.label)}: ${s.out?'not attending':'attending'}">${esc(lab)}${s.out&&!s.fixed?`<span class="tg">${esc(s.txt)}</span>`:s.tag?`<span class="tg">${esc(s.tag)}</span>`:''}</button></td>`;}).join('')+'</tr>';
     });
     h+='<tr class="tot"><td>Attending</td>'+CALLS.map((c,i)=>`<td class="num ${isPast(c)?'past':''}">${PEOPLE.filter(p=>{const s=cellState(p,i);return !s.out&&!s.maybe}).length} of ${PEOPLE.length}${PEOPLE.some(p=>cellState(p,i).maybe)?`<span class="sl">+ ${PEOPLE.filter(p=>cellState(p,i).maybe).length} maybe</span>`:''}</td>`).join('')+'</tr></tbody>';
-    $('#sched').innerHTML=h;
+    if($('#sched')) $('#sched').innerHTML=h;
     // next call card
     const nc=$('#nextCall');
     if(nextIdx<0){nc.innerHTML='<div class="eyebrow">Next content team call</div><p>All scheduled calls for Oct–Dec are done.</p>';return;}
@@ -622,10 +616,10 @@ const SUPABASE_KEY = 'sb_publishable_dukb24tfoznTtdsoDc8x_w_roDfMAHM';
       ${c.title?`<div style="font-weight:700;margin-top:6px">${esc(c.title)}</div>`:''}${c.zoom?`<p style="margin:4px 0 0;font-size:14px"><a href="${c.zoom}" target="_blank" rel="noopener">Join on Zoom</a> · Meeting ID 947 0198 7638</p>`:''}${c.agenda?`<div class="eyebrow" style="margin:12px 0 4px">Agenda</div><ol class="slots" style="margin:0 0 12px">${c.agenda.map(a=>`<li>${esc(a)}</li>`).join('')}</ol>`:''}<ul>${st.map(x=>`<li class="${x.s.out?'o':(x.s.odd||x.s.maybe)?'e':''}"><span>${esc(x.p[1])}</span><span>${x.s.out?(x.s.fixed?esc(x.s.txt):"Can't make it"):(x.s.maybe?'Maybe · '+esc(x.s.tag):esc(x.s.txt))}</span></li>`).join('')}</ul>`;
   }
   renderSched();
-  $('#sched').addEventListener('click',async e=>{
+  if($('#sched')) $('#sched').addEventListener('click',async e=>{
     const b=e.target.closest('button.cell'); if(!b||b.disabled)return; const k=b.dataset.k; const out=!rsvp[k];
     if(out)rsvp[k]=true; else delete rsvp[k]; renderSched();
-    if(db){try{await db.collection('rsvp').doc(k).set({out,at:new Date().toISOString()});}catch(err){$('#rsvpNote').textContent='Could not save that change. Check your connection and try again.';}}
+    if(db){try{await db.collection('rsvp').doc(k).set({out,at:new Date().toISOString()});}catch(err){($('#rsvpNote')||{}).textContent='Could not save that change. Check your connection and try again.';}}
     else{try{localStorage.setItem('meo-rsvp',JSON.stringify(rsvp))}catch(e){}}
   });
   try{rsvp=JSON.parse(localStorage.getItem('meo-rsvp')||'{}');renderSched();}catch(e){}
@@ -870,15 +864,15 @@ const SUPABASE_KEY = 'sb_publishable_dukb24tfoznTtdsoDc8x_w_roDfMAHM';
   (async()=>{
     if(SUPABASE_URL&&SUPABASE_KEY) db=supaDb(SUPABASE_URL.replace(/\/+$/,''),SUPABASE_KEY);
     else { try{ db=window.claude&&window.claude.use?await window.claude.use('db'):null; }catch(e){db=null} }
-    if(!db){ $('#syncNote').textContent='Ticks saved in this browser only'; $('#rsvpNote').textContent='Changes saved in this browser only'; $('#mtgNote').textContent='Notes saved in this browser only'; return; }
+    if(!db){ $('#syncNote').textContent='Ticks saved in this browser only'; ($('#rsvpNote')||{}).textContent='Changes saved in this browser only'; $('#mtgNote').textContent='Notes saved in this browser only'; return; }
     db.collection('meetings').onSnapshot(snap=>{
       const m={}; snap.docs.forEach(d=>{const v=d.data(); if(v) m[d.id]=v;});
       MTG=m; $('#mtgNote').textContent='Shared with the whole team'; if(!mtgEditing) renderMeetings();
     },()=>{ $('#mtgNote').textContent='Shared notes unavailable right now'; });
     db.collection('rsvp').onSnapshot(snap=>{
       const r={}; snap.docs.forEach(d=>{const v=d.data(); if(v&&v.out)r[d.id]=true;});
-      rsvp=r; $('#rsvpNote').textContent='Shared with the whole team'; renderSched();
-    },()=>{ $('#rsvpNote').textContent='Shared updates unavailable right now'; });
+      rsvp=r; ($('#rsvpNote')||{}).textContent='Shared with the whole team'; renderSched();
+    },()=>{ ($('#rsvpNote')||{}).textContent='Shared updates unavailable right now'; });
     db.collection('ticks').onSnapshot(snap=>{
       const t={}; snap.docs.forEach(d=>{const v=d.data(); if(v&&v.done)t[d.id]=true;});
       ticks=t; local=false; $('#syncNote').textContent='Ticks are shared with the whole team'; render();
