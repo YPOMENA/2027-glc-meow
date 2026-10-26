@@ -329,14 +329,9 @@ footer b{color:var(--blue);font-family:var(--display)}
       <div class="card next" id="nextCall"></div>
       <div class="card">
         <div class="eyebrow" style="margin-bottom:10px">How the calls work</div>
-        <p style="margin:0 0 8px">Every 2 weeks · 60 minutes · Tuesday for the Americas, Wednesday for everyone else.</p>
-        <p style="margin:0 0 8px"><b>Kick-off Zoom:</b> <a href="https://ypo.zoom.us/j/94701987638" target="_blank" rel="noopener">ypo.zoom.us/j/94701987638</a></p>
-        <ul class="slots">
-          <li><b>Slot A</b> Best for Asia-Pacific. Americas join in the evening, Marios at 5am.</li>
-          <li><b>Slot B</b> Best for the Americas. Dubai, Kolkata and KL join very late or very early.</li>
-          <li><b>Slot C</b> 4 Nov only, while Marios is in North America. A reasonable hour for everyone.</li>
-        </ul>
-        <p class="muted" style="margin:8px 0 0;font-size:13px">6 separate invites, not a series; calendars convert to local time. Clock changes are built in (Cyprus 25 Oct, North America 1 Nov).</p>
+        <p style="margin:0 0 8px">5 calls, Oct–Dec · 60 minutes each · Cohorts A &amp; B together. Each call has its own Zoom link.</p>
+        <ul class="slots" id="callList"></ul>
+        <p class="muted" style="margin:8px 0 0;font-size:13px">Separate invites from Tamara, not a series; calendars convert to local time.</p>
       </div>
     </div>
     <div class="card">
@@ -571,34 +566,47 @@ const SUPABASE_KEY = 'sb_publishable_dukb24tfoznTtdsoDc8x_w_roDfMAHM';
   const fmtD=x=>D(x).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
   $('#months').innerHTML=MONTHS.map(m=>`<div class="month${m[0]===ym?' cur':''}"><h3>${m[1]}</h3>${m[2].map(g=>`<div class="grp${g[3]?' glc':''}"><div class="lead">${esc(g[0])}</div>${g[1]?`<div class="due">Week of ${fmtD(g[1])}</div>`:''}${g[2].map(i=>`<div class="it">${esc(i)}</div>`).join('')}</div>`).join('')}</div>`).join('');
 
-  // Call schedule (GLC Content Team Meeting Schedule v8). start = UTC start time.
+  // Content team calls, from the Outlook invites. start = UTC start time.
   const CALLS=[
-    {id:'c1',label:'Wed 7 / Thu 8 Oct',slot:'Kick-off',start:'2026-10-08T04:00:00Z',title:'MEOW GLC Content: Kick-off meeting',agenda:['Establish learning design','Build basic outline','Establish 3–4 learning objectives we all commit to','Finalise theme','Guest speakers (panellists)'],zoom:'https://ypo.zoom.us/j/94701987638'},
-    {id:'c2',label:'Tue 13 / Wed 14 Oct',slot:'A',start:'2026-10-14T02:00:00Z'},
-    {id:'c3',label:'Tue 3 / Wed 4 Nov',slot:'C (one-off)',start:'2026-11-04T01:00:00Z'},
-    {id:'c4',label:'Tue 17 / Wed 18 Nov',slot:'A',start:'2026-11-18T03:00:00Z'},
-    {id:'c5',label:'Tue 8 / Wed 9 Dec',slot:'B',start:'2026-12-08T20:00:00Z'},
-    {id:'c6',label:'Tue 15 / Wed 16 Dec',slot:'A · final full cohort (A+B)',start:'2026-12-16T03:00:00Z'}
+    {id:'c1',label:'Wed 7 / Thu 8 Oct',start:'2026-10-08T04:00:00Z',title:'MEOW GLC Content: Kick-off meeting',agenda:['Establish learning design','Build basic outline','Establish 3–4 learning objectives we all commit to','Finalise theme','Guest speakers (panellists)'],zoom:'https://ypo.zoom.us/j/94701987638'},
+    {id:'m2',label:'Wed 28 / Thu 29 Oct',start:'2026-10-29T03:00:00Z',title:'MEOW GLC Meeting 2 (Cohorts A & B)',zoom:'https://ypo.zoom.us/j/97292776288'},
+    {id:'m3',label:'Wed 11 / Thu 12 Nov',start:'2026-11-12T01:00:00Z',title:'MEOW GLC Meeting 3 (Cohorts A & B)',zoom:'https://ypo.zoom.us/j/92847020684'},
+    {id:'m4',label:'Tue 1 / Wed 2 Dec',start:'2026-12-01T20:00:00Z',title:'MEOW GLC Meeting 4 (Cohorts A & B)',zoom:'https://ypo.zoom.us/j/96306340766'},
+    {id:'m5',label:'Tue 15 / Wed 16 Dec',start:'2026-12-15T20:00:00Z',title:'MEOW GLC Meeting 5 (Cohorts A & B)',zoom:'https://ypo.zoom.us/j/96752683142'}
   ];
-  // per person: local times per call; '!' prefix = very early/late; 'OUT' = out per the schedule
+  // per person: [key, name, role, time zone]; local call times are worked out from the time zone
   const PEOPLE=[
-    ['mandi','Mandi','MP · S. California',['Wed 9pm','OUT|Out of office','Tue 5pm','Tue 7pm','Tue 12pm','Tue 7pm']],
-    ['jill','Jill','Champion · Toronto',['OUT|Can\'t make it','!Tue 10pm','OUT|Can\'t make it','!Tue 10pm','Tue 3pm','!Tue 10pm']],
-    ['marios','Marios','Champion · Cyprus',['Thu 7am','!Wed 5am','OUT|With a client (in US)','~Wed 5am|Just off a 36h flight','Tue 10pm','~Wed 4am|In Zurich']],
-    ['tamara','Tamara','MP · Dubai',['Thu 8am','Wed 6am','!Wed 5am','Wed 7am','!Wed 12am','Wed 7am']],
-    ['niloma','Niloma','MP · Kolkata',['Thu 9:30am','Wed 7:30am','Wed 6:30am','Wed 8:30am','!Wed 1:30am','Wed 8:30am']],
-    ['jennifer','Jennifer','MP · Kuala Lumpur',['Thu 12pm','Wed 10am','Wed 9am','Wed 11am','!Wed 4am','Wed 11am']],
-    ['ben','Ben','Champion · Sydney',['Thu 3pm','~Wed 1pm|On a course, will try','~Wed 4am|At GBS Istanbul, will try','Wed 2pm','Wed 7am','Wed 2pm']],
-    ['mia','Mia','Champion · New Zealand',['Thu 5pm','Wed 3pm','~Wed 2pm|On a course, will step out','Wed 4pm','Wed 9am','Wed 4pm']]
+    ['mandi','Mandi','MP · S. California','America/Los_Angeles'],
+    ['jill','Jill','Champion · Toronto','America/Toronto'],
+    ['marios','Marios','Champion · Cyprus','Asia/Nicosia'],
+    ['tamara','Tamara','MP · Dubai','Asia/Dubai'],
+    ['niloma','Niloma','MP · Kolkata','Asia/Kolkata'],
+    ['jennifer','Jennifer','MP · Kuala Lumpur','Asia/Kuala_Lumpur'],
+    ['ben','Ben','Champion · Sydney','Australia/Sydney'],
+    ['mia','Mia','Champion · New Zealand','Pacific/Auckland']
   ];
+  // Known exceptions by `${callId}-${person}`: 'OUT|reason', or a different time zone + note while travelling
+  const EXCEPT={
+    'c1-jill':'OUT|Can\'t make it',
+    'm2-mandi':'OUT|Out of office',
+    'm3-marios':{tz:'America/New_York',note:'In North America'}
+  };
+  const localTime=(iso,tz)=>{const d=new Date(iso);
+    const wd=d.toLocaleString('en-GB',{timeZone:tz,weekday:'short'});
+    const [h,m]=d.toLocaleString('en-GB',{timeZone:tz,hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).split(':').map(Number);
+    const t=(h%12||12)+(m?':'+String(m).padStart(2,'0'):'')+(h<12?'am':'pm');
+    return {txt:wd+' '+t,odd:h<6||h>=22};};
   let rsvp={}; // key `${callId}-${person}` -> true when can't attend
   const now=Date.now();
   const isPast=c=>now>new Date(c.start).getTime()+3600e3;
   const nextIdx=CALLS.findIndex(c=>!isPast(c));
-  const cellState=(p,i)=>{const raw=p[3][i]; if(raw.startsWith('OUT'))return{out:true,fixed:true,txt:raw.split('|')[1]||'Out of office',tag:''};
-    const [t,tag]=raw.replace(/^[!~]/,'').split('|'); const out=!!rsvp[CALLS[i].id+'-'+p[0]]; return{out,maybe:!out&&raw[0]==='~',odd:raw[0]==='!',txt:t,tag:tag||''};};
+  const cellState=(p,i)=>{const c=CALLS[i]; const ex=EXCEPT[c.id+'-'+p[0]];
+    if(typeof ex==='string')return{out:true,fixed:true,txt:ex.split('|')[1]||'Out of office',tag:''};
+    const lt=localTime(c.start,(ex&&ex.tz)||p[3]); const out=!!rsvp[c.id+'-'+p[0]];
+    return{out,maybe:false,odd:lt.odd,txt:lt.txt,tag:(ex&&ex.note)||''};};
+  const zoomId=u=>{const m=String(u).match(/\/j\/(\d+)/); return m?m[1].replace(/^(\d{3})(\d{4})(\d+)$/,'$1 $2 $3'):'';};
   function renderSched(){
-    let h='<thead><tr><th>Person</th>'+CALLS.map((c,i)=>`<th class="${isPast(c)?'past':''}${i===nextIdx?' nx':''}">${esc(c.label)}<span class="sl">Slot ${esc(c.slot)}${i===nextIdx?' · next':''}</span></th>`).join('')+'</tr></thead><tbody>';
+    let h='<thead><tr><th>Person</th>'+CALLS.map((c,i)=>`<th class="${isPast(c)?'past':''}${i===nextIdx?' nx':''}">${esc(c.label)}<span class="sl">${i===nextIdx?'Next':''}</span></th>`).join('')+'</tr></thead><tbody>';
     PEOPLE.forEach(p=>{
       h+=`<tr><td class="pp">${esc(p[1])}<small>${esc(p[2])}</small></td>`+CALLS.map((c,i)=>{const s=cellState(p,i);
         const cls='cell'+(s.out?' out':s.maybe?' maybe':s.odd?' odd':'')+(s.fixed?' fixed':'');
@@ -612,11 +620,13 @@ const SUPABASE_KEY = 'sb_publishable_dukb24tfoznTtdsoDc8x_w_roDfMAHM';
     if(nextIdx<0){nc.innerHTML='<div class="eyebrow">Next content team call</div><p>All scheduled calls for Oct–Dec are done.</p>';return;}
     const c=CALLS[nextIdx]; const st=PEOPLE.map(p=>({p,s:cellState(p,nextIdx)})); const n=st.filter(x=>!x.s.out&&!x.s.maybe).length; const nm=st.filter(x=>x.s.maybe).length;
     const dubai=new Date(c.start).toLocaleString('en-GB',{timeZone:'Asia/Dubai',weekday:'short',day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true});
-    nc.innerHTML=`<div class="eyebrow">Next content team call</div><div class="when-big">${esc(c.label)}</div><div class="muted" style="font-size:14px">Slot ${esc(c.slot)} · ${esc(dubai)} Dubai time · 60 min</div>
+    nc.innerHTML=`<div class="eyebrow">Next content team call</div><div class="when-big">${esc(c.label)}</div><div class="muted" style="font-size:14px">${esc(dubai)} Dubai time · 60 min</div>
       <div class="att"><div class="meter"><i style="width:${n/PEOPLE.length*100}%"></i></div><b class="num">${n} of ${PEOPLE.length} confirmed${nm?` · ${nm} maybe`:''}</b></div>
-      ${c.title?`<div style="font-weight:700;margin-top:6px">${esc(c.title)}</div>`:''}${c.zoom?`<p style="margin:4px 0 0;font-size:14px"><a href="${c.zoom}" target="_blank" rel="noopener">Join on Zoom</a> · Meeting ID 947 0198 7638</p>`:''}${c.agenda?`<div class="eyebrow" style="margin:12px 0 4px">Agenda</div><ol class="slots" style="margin:0 0 12px">${c.agenda.map(a=>`<li>${esc(a)}</li>`).join('')}</ol>`:''}<ul>${st.map(x=>`<li class="${x.s.out?'o':(x.s.odd||x.s.maybe)?'e':''}"><span>${esc(x.p[1])}</span><span>${x.s.out?(x.s.fixed?esc(x.s.txt):"Can't make it"):(x.s.maybe?'Maybe · '+esc(x.s.tag):esc(x.s.txt))}</span></li>`).join('')}</ul>`;
+      ${c.title?`<div style="font-weight:700;margin-top:6px">${esc(c.title)}</div>`:''}${c.zoom?`<p style="margin:4px 0 0;font-size:14px"><a href="${esc(c.zoom)}" target="_blank" rel="noopener">Join on Zoom</a> · Meeting ID ${esc(zoomId(c.zoom))}</p>`:''}${c.agenda?`<div class="eyebrow" style="margin:12px 0 4px">Agenda</div><ol class="slots" style="margin:0 0 12px">${c.agenda.map(a=>`<li>${esc(a)}</li>`).join('')}</ol>`:''}<ul>${st.map(x=>`<li class="${x.s.out?'o':(x.s.odd||x.s.maybe)?'e':''}"><span>${esc(x.p[1])}</span><span>${x.s.out?(x.s.fixed?esc(x.s.txt):"Can't make it"):(x.s.maybe?'Maybe · '+esc(x.s.tag):esc(x.s.txt))}</span></li>`).join('')}</ul>`;
   }
   renderSched();
+  $('#callList').innerHTML=CALLS.map(c=>{const d=new Date(c.start).toLocaleString('en-GB',{timeZone:'Asia/Dubai',weekday:'short',day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true});
+    return `<li class="${isPast(c)?'muted':''}"><b>${esc((c.title||'').replace(/^MEOW GLC (Content: )?/,'').replace(' (Cohorts A & B)',''))}</b> · ${esc(d)} Dubai${c.zoom?` · <a href="${esc(c.zoom)}" target="_blank" rel="noopener">Zoom</a>`:''}</li>`;}).join('');
   if($('#sched')) $('#sched').addEventListener('click',async e=>{
     const b=e.target.closest('button.cell'); if(!b||b.disabled)return; const k=b.dataset.k; const out=!rsvp[k];
     if(out)rsvp[k]=true; else delete rsvp[k]; renderSched();
@@ -690,7 +700,7 @@ const SUPABASE_KEY = 'sb_publishable_dukb24tfoznTtdsoDc8x_w_roDfMAHM';
         ${NOTE_PARTS.map(([k,h])=>`<div><h4>${h}</h4>${noteVal(m,k)?`<div class="notes-txt">${fmtNotes(noteVal(m,k))}</div>`:`<p class="empty">${!hasNotes(m)&&!past?'Add after the call.':'Nothing added yet.'}</p>`}</div>`).join('')}
         <div><h4>Recording</h4>${m.recording?`<a href="${esc(m.recording)}" target="_blank" rel="noopener">Watch the recording</a>${m.passcode?`<div class="pcode">Passcode: <code>${esc(m.passcode)}</code><button type="button" class="btn sm" data-act="copy" data-code="${esc(m.passcode)}">Copy</button></div>`:''}`:'<p class="empty">No recording link yet.</p>'}</div>
         <div class="btnrow"><button class="btn" data-act="edit" data-id="${c.id}">${hasNotes(m)||m.recording?'Edit':'Add notes &amp; recording'}</button>${m.at?`<span class="sync">Last updated ${new Date(m.at).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</span>`:''}</div>`;
-      return `<details class="mtg"${open?' open':''}><summary><span class="mt">${esc(c.title||'Content team call')} · ${esc(c.label)}</span><span class="mpills">${pills}</span><span class="ms">${esc(dubai)} Dubai · Slot ${esc(c.slot)}</span></summary><div class="mb">${body}</div></details>`;
+      return `<details class="mtg"${open?' open':''}><summary><span class="mt">${esc(c.title||'Content team call')} · ${esc(c.label)}</span><span class="mpills">${pills}</span><span class="ms">${esc(dubai)} Dubai${c.zoom?` · <a href="${esc(c.zoom)}" target="_blank" rel="noopener">Zoom</a>`:''}</span></summary><div class="mb">${body}</div></details>`;
     }).join('');
   }
   $('#mtgList').addEventListener('click',async e=>{
