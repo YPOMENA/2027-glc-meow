@@ -722,7 +722,7 @@ const SUPABASE_KEY = 'sb_publishable_dukb24tfoznTtdsoDc8x_w_roDfMAHM';
       const st=document.getElementById('ms-'+id);
       if(rec && !/^https?:\/\//i.test(rec)){st.textContent='The recording link needs to start with https://';return;}
       const doc={recording:rec,passcode:document.getElementById('mp-'+id).value.trim(),at:new Date().toISOString()}; NOTE_PARTS.forEach(([k])=>doc[k]=document.getElementById('mn-'+k+'-'+id).value.trim());
-      if(db){ try{ b.disabled=true; st.textContent='Saving…'; await db.collection('meetings').doc(id).set(doc); }catch(err){ b.disabled=false; st.textContent='Could not save. Check your connection and try again.'; return; } }
+      if(db){ try{ b.disabled=true; st.textContent='Saving…'; await db.collection('meetings').doc(id).set(doc); }catch(err){ b.disabled=false; st.textContent='Could not save ('+String(err&&err.message||err).slice(0,200)+'). Please send this message to the hub admin.'; console.error('Save failed',err); return; } }
       else { try{const all=JSON.parse(localStorage.getItem('meo-mtg')||'{}'); all[id]=doc; localStorage.setItem('meo-mtg',JSON.stringify(all));}catch(e){} }
       MTG[id]=doc; mtgEditing=null; renderMeetings();
     }
@@ -842,7 +842,7 @@ const SUPABASE_KEY = 'sb_publishable_dukb24tfoznTtdsoDc8x_w_roDfMAHM';
     document.addEventListener('visibilitychange',()=>{ if(!document.hidden) refresh(); });
     async function save(collection,id,data){
       const r=await fetch(url+'/rest/v1/rpc/hub_save',{method:'POST',headers:H,body:JSON.stringify({p_collection:collection,p_id:id,p_data:data})});
-      if(!r.ok) throw new Error(await r.text());
+      if(!r.ok){ const t=await r.text(); let msg=t; try{const j=JSON.parse(t); msg=j.message||j.hint||t;}catch(e){} throw new Error('HTTP '+r.status+(msg?': '+msg:'')); }
       gen++; soon();
     }
     return { collection:name=>({
