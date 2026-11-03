@@ -178,6 +178,26 @@ td.who{font-weight:700;color:var(--blue)}
 .task .tm b{color:var(--ink);font-weight:700}
 .task .tn{font-size:12.5px;color:var(--muted);margin-top:4px;font-style:italic}
 .task .tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+/* gantt */
+.gscroll{overflow-x:auto;margin:0 -4px;padding:0 4px}
+.gchart{min-width:820px}
+.grow{display:grid;grid-template-columns:270px minmax(0,1fr);align-items:center;border-top:1px solid var(--line)}
+.grow.ghead{border-top:0;height:22px}
+.glab{padding:6px 12px 6px 0;min-width:0;line-height:1.25}
+.glab .gt{display:block;font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.glab .gw{display:block;font-size:11.5px;color:var(--muted)}
+.grow.isdone .gt{text-decoration:line-through;color:var(--muted)}
+.gtrack{position:relative;height:100%;min-height:36px}
+.ghead .gtrack{min-height:22px}
+.gmon{position:absolute;top:2px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;padding-left:4px}
+.gm{position:absolute;top:0;bottom:0;width:1px;background:var(--line)}
+.gbreak{position:absolute;top:0;bottom:0;background:var(--red-soft);opacity:.8}
+.gtoday{position:absolute;top:0;bottom:0;width:2px;background:var(--red);z-index:2}
+.gbar{position:absolute;top:50%;height:12px;margin-top:-6px;border-radius:4px;background:var(--c);z-index:1}
+.gbar.late{outline:2px solid var(--red);outline-offset:1px}
+.gbar.done,.gdot.done{opacity:.35}
+.gdot{position:absolute;top:50%;width:11px;height:11px;margin:-5.5px 0 0 -5.5px;background:var(--c);transform:rotate(45deg);z-index:1}
+@media (max-width:600px){.grow{grid-template-columns:180px minmax(0,1fr)}.gchart{min-width:680px}}
 .sync{font-size:12.5px;color:var(--muted)}
 .empty{padding:20px 0;color:var(--muted)}
 
@@ -393,6 +413,8 @@ footer b{color:var(--blue);font-family:var(--display)}
 
   <!-- TASKS -->
   <section id="tasks">
+    <div class="sec-head"><div class="eyebrow">Content build timeline · Oct 2026–Jun 2027</div><span class="sync">From the Workshop Learning Design Gantt</span></div>
+    <div class="card" style="margin-bottom:28px"><div id="gantt"></div></div>
     <div class="sec-head"><div class="eyebrow">Management task list</div><span class="sync" id="syncNote">Loading shared ticks…</span></div>
     <div class="card">
       <div class="filters" role="group" aria-label="Show">
@@ -767,8 +789,6 @@ const SUPABASE_KEY = 'sb_publishable_dukb24tfoznTtdsoDc8x_w_roDfMAHM';
   const T=[
     [1,'Logistical','Plan meeting cadence','Tamara','Niloma','WDT Planning & Readiness',0],
     [2,'Logistical','Create and send calendar invites / Zoom links for all touchpoints','Tamara','Niloma','WDT Planning & Readiness',0],
-    [3,'Logistical',"Update Leader's Guides (slide notes)",'Niloma','Mandi','Content & Workshop Canva',0],
-    [4,'Logistical','Update Participant Guides','TBC','','Content & Workshop Canva',0,'Confirm what this covers'],
     [5,'Logistical','Create meeting agendas','Tamara','Niloma','WDT Planning & Readiness',1],
     [6,'Logistical','Manage Canva during run-throughs','Mandi','Jennifer','Content & Workshop Canva',0],
     [7,'Logistical','Submit print requests','Tamara','Niloma','Content & Workshop Canva',0],
@@ -786,11 +806,10 @@ const SUPABASE_KEY = 'sb_publishable_dukb24tfoznTtdsoDc8x_w_roDfMAHM';
     [17,'Logistical','Create and manage seating chart','TBC','','Onsite Logistics',1,'Split between Cohorts A and B'],
     [18,'Logistical','Analyse time used in the workshop (lecture vs activity) and share with LDT partner','Niloma','Tamara','Learning Design',1],
     [19,'Logistical','Ship workshop materials to GLC location','Tamara','Niloma','Onsite Logistics',0,'Split between Cohorts A and B'],
-    [20,'Logistical','Onsite room set-up','TBC','','Onsite Logistics',0,'Split between Cohorts A and B'],
+    [20,'Logistical','Onsite room set-up','Tamara','','Onsite Logistics',0,'Split between Cohorts A and B. "Logistics & Setup" in the build plan'],
     [21,'Logistical','Check prints are complete','Tamara','Niloma','Onsite Logistics',0],
     [22,'Logistical','Retrieve supplies from OE office onsite','Tamara','Niloma','Onsite Logistics',0],
     [23,'Logistical','Box materials and return to OE office, if applicable','Tamara','Niloma','Onsite Logistics',0],
-    [24,'Logistical','Update materials for virtual sessions','TBC','','Content & Workshop Canva',1,'Shared'],
     [25,'Logistical','Schedule virtual workshop rehearsals with producer','TBC','','WDT Planning & Readiness',1,'Shared'],
     [26,'Logistical','Attend virtual workshop facilitator training','Shared','All four','Knowledge & Skills',0],
     [27,'Logistical','Submit expense reports on time','Shared','Each person','Own expenses',0],
@@ -813,14 +832,83 @@ const SUPABASE_KEY = 'sb_publishable_dukb24tfoznTtdsoDc8x_w_roDfMAHM';
     [44,'Planning','Define purpose, audience, outcomes, core message and participant journey','Shared','All four','Learning Design',0,'On the 8 Oct kick-off agenda with the Champions'],
     [45,'Planning','Confirm ownership of the major content areas','Tamara','Niloma','WDT Planning & Readiness',0],
     [48,'Planning','Share the workshop outline by email with all Champions, including Jill, for review and input','TBC','','Learning Design',0,'After Meeting 2 (29 Oct)'],
-    [49,'Planning','Finalise the outline and send it to Jay and Farid for approval','TBC','','Learning Design',0,'Changes after approval will be hard and need more approvals, so get it right first'],
-    [50,'Planning','Confirm the approval timeline with Jay and Farid','TBC','','WDT Planning & Readiness',0,'Still waiting to hear back']
+    [49,'Planning','Finalise the outline and send it to Jay and Farid for approval','Niloma','','Learning Design',0,'"Content Approval - CRC" in the build plan. Changes after approval will be hard and need more approvals, so get it right first'],
+    [50,'Planning','Confirm the approval timeline with Jay and Farid','TBC','','WDT Planning & Readiness',0,'Still waiting to hear back'],
+    // Content build plan (Workshop Learning Design Gantt), in date order. Ids 3, 4 and 24 were RACI tasks covering the same work.
+    [51,'Content build','Select and sequence topics and exercises','Niloma','','Learning Design',0],
+    [3,'Content build',"Build the Leader's Guide: round 1",'Niloma','Mandi','Content & Workshop Canva',0,"Replaces \"Update Leader's Guides (slide notes)\""],
+    [52,'Content build','Build the slide deck: round 1','Mandi','','Content & Workshop Canva',0],
+    [54,'Content build',"Build the Leader's Guide: round 2",'Niloma','','Content & Workshop Canva',0],
+    [53,'Content build',"Champion review 1: slide deck and Leader's Guide",'Champions','','Champion Review',0],
+    [55,'Content build','Build the slide deck: round 2','Mandi','','Content & Workshop Canva',0],
+    [56,'Content build',"Champion review 2: slide deck and Leader's Guide",'Champions','','Champion Review',0],
+    [57,'Content build',"Revise the slides and Leader's Guide",'Niloma','','Content & Workshop Canva',0],
+    [4,'Content build','Build the participant workbook','Jennifer','','Content & Workshop Canva',0,'Includes the Christmas break and YPO travel. Replaces "Update Participant Guides"'],
+    [58,'Content build',"Final Champion review: slides and Leader's Guide",'Champions','','Champion Review',0],
+    [59,'Content build','Champion review: participant workbook','Champions','','Champion Review',0],
+    [61,'Content build','Design and deliver the pre-workshop participant comms experience','Champions','','Participant Comms',0,'Covers the pre-workshop survey and 3-2-1 WhatsApp in Communication tasks'],
+    [60,'Content build','Print the participant workbook','Jennifer','','Content & Workshop Canva',0,'Tamara submits the print request (Logistical tasks)'],
+    [62,'Content build','Build participant experience assets for MEOW','Mandi','','Content & Workshop Canva',0],
+    [63,'Content build','Practice session 1','Champions','','Rehearsals',0,'Could double as the rehearsal with JD in February'],
+    [64,'Content build','Final content revisions','Niloma','','Content & Workshop Canva',0],
+    [65,'Content build','Practice session 2','Champions','','Rehearsals',0],
+    [66,'Content build','Dry run','Niloma','','Rehearsals',0,'Same day as the WDT rehearsal and onsite set-up'],
+    [67,'Content build','Deliver the workshop in Bangkok','Champions','','GLC Bangkok',0],
+    [68,'Content build','Travel and reflection','Shared','Everyone','After the Workshop',0],
+    [24,'Content build','Build the virtual workshop content','Niloma','','Content & Workshop Canva',0,'Replaces "Update materials for virtual sessions"'],
+    [69,'Content build','Content edits for San Diego','Niloma','','Content & Workshop Canva',0],
+    [70,'Content build','Slide edits for San Diego','Mandi','','Content & Workshop Canva',0],
+    [72,'Content build','Review the virtual workshop content','Champions','','Champion Review',0],
+    [73,'Content build','Finalise the virtual workshop content','Niloma','','Content & Workshop Canva',0],
+    [71,'Content build','Practice session 3','Niloma','','Rehearsals',0],
+    [74,'Content build','Dry run of the virtual workshop','Niloma','','Rehearsals',0],
+    [75,'Content build','Deliver the virtual workshops','Champions','','Virtual Workshops',0]
   ];
+  // Timelines: id -> [start, end, phase, status]. Phase: plan, build, review, logistics
+  const DATES={
+    51:['2026-10-05','2026-10-26','plan','In progress · 20%'],
+    49:['2026-11-02','2026-11-13','review'],
+    3:['2026-11-02','2026-11-06','build','In progress'],
+    52:['2026-11-04','2026-11-11','build'],
+    54:['2026-11-09','2026-11-18','build'],
+    53:['2026-11-12','2026-11-12','review'],
+    55:['2026-11-16','2026-11-24','build'],
+    56:['2026-12-02','2026-12-02','review'],
+    57:['2026-12-03','2026-12-15','build'],
+    4:['2026-12-03','2027-01-27','build'],
+    58:['2026-12-16','2026-12-16','review'],
+    59:['2027-01-28','2027-01-28','review'],
+    61:['2027-01-28','2027-02-10','build'],
+    60:['2027-01-29','2027-02-26','logistics'],
+    62:['2027-02-10','2027-02-17','build'],
+    63:['2027-02-16','2027-02-16','review'],
+    64:['2027-02-17','2027-03-01','build'],
+    65:['2027-03-02','2027-03-02','review'],
+    20:['2027-03-14','2027-03-14','logistics'],
+    66:['2027-03-14','2027-03-14','review'],
+    67:['2027-03-15','2027-03-16','logistics'],
+    68:['2027-03-17','2027-03-26','plan'],
+    24:['2027-03-29','2027-04-02','build'],
+    69:['2027-03-29','2027-04-16','build'],
+    70:['2027-03-29','2027-04-16','build'],
+    72:['2027-04-05','2027-04-16','review'],
+    73:['2027-04-19','2027-04-30','build'],
+    71:['2027-04-20','2027-04-20','review'],
+    74:['2027-05-11','2027-05-11','review'],
+    75:['2027-05-17','2027-06-18','logistics']
+  };
+  const BREAKS=[['US Thanksgiving · 3 of us away','2026-11-25','2026-11-30']];
+  const PHASES={plan:['Planning','var(--muted)'],build:['Build','var(--azure)'],review:['Review','var(--gold)'],logistics:['Logistics & delivery','var(--green)']};
+  const dD=x=>new Date(x+'T00:00:00');
+  const fmtRange=(a,b)=>{const o={day:'numeric',month:'short'}; const A=dD(a),B=dD(b);
+    if(a===b) return A.toLocaleDateString('en-GB',{weekday:'short',...o});
+    const ys=A.getFullYear()!==B.getFullYear();
+    return A.toLocaleDateString('en-GB',ys?{...o,year:'numeric'}:(A.getMonth()===B.getMonth()?{day:'numeric'}:o))+'–'+B.toLocaleDateString('en-GB',ys?{...o,year:'numeric'}:o);};
   // Mandi also co-owns 30/31
-  const coOwner={30:'Mandi',31:'Mandi'};
+  const coOwner={30:'Mandi',31:'Mandi',62:'Jennifer'};
   // Informed parties (by task id)
   const INFORMED={}; [42,43,44,45,1,14,15,16,17,18,24,25].forEach(id=>INFORMED[id]='Champions');
-  const GROUPS=['Planning','Logistical','Communication','Relational'];
+  const GROUPS=['Planning','Content build','Logistical','Communication','Relational'];
   const NUM={}; let _n=0; GROUPS.forEach(g=>T.filter(t=>t[1]===g).forEach(t=>{NUM[t[0]]=++_n;}));
   let ticks={}; const f={state:'open',who:'all'}; let db=null; let local=true;
   // Supabase adapter with the same shape as the claude db: collection(name).doc(id).set(data) and
@@ -852,6 +940,27 @@ const SUPABASE_KEY = 'sb_publishable_dukb24tfoznTtdsoDc8x_w_roDfMAHM';
   }
   try{ticks=JSON.parse(localStorage.getItem('meo-ticks')||'{}')}catch(e){}
 
+  function renderGantt(){
+    const el=$('#gantt'); if(!el) return;
+    const g0=dD('2026-10-01'), g1=dD('2027-07-01'); const span=g1-g0;
+    const pos=d=>Math.max(0,Math.min(100,(dD(d)-g0)/span*100));
+    const months=[]; for(let d=new Date(g0); d<g1; d.setMonth(d.getMonth()+1)) months.push(new Date(d));
+    const grid=months.map(m=>`<i class="gm" style="left:${(m-g0)/span*100}%"></i>`).join('');
+    const tpos=(today-g0)/span*100; const todayLine=tpos>=0&&tpos<=100?`<i class="gtoday" style="left:${tpos}%"></i>`:'';
+    const bands=BREAKS.map(b=>`<i class="gbreak" style="left:${pos(b[1])}%;width:${pos(b[2])-pos(b[1])+100/273}%" title="${esc(b[0])}"></i>`).join('');
+    const head=`<div class="grow ghead"><div class="glab"></div><div class="gtrack">${months.map(m=>`<span class="gmon" style="left:${(m-g0)/span*100}%">${m.toLocaleDateString('en-GB',{month:'short'})}${m.getMonth()===0?' ’'+String(m.getFullYear()).slice(2):''}</span>`).join('')}</div></div>`;
+    const rows=T.filter(t=>DATES[t[0]]).sort((a,b)=>DATES[a[0]][0].localeCompare(DATES[b[0]][0])).map(t=>{
+      const [a,b,ph]=DATES[t[0]]; const on=!!ticks['t'+t[0]]; const late=!on&&today>dD(b);
+      const one=a===b; const l=pos(a), w=Math.max(pos(b)-l+100/273,0.4);
+      const who=t[3]+(coOwner[t[0]]?' / '+coOwner[t[0]]:'');
+      const tip=`${t[2]} · ${who} · ${fmtRange(a,b)}${on?' · done':late?' · overdue':''}`;
+      const mark=one?`<i class="gdot${on?' done':''}" style="left:${l}%;--c:${PHASES[ph][1]}" title="${esc(tip)}"></i>`
+        :`<i class="gbar${on?' done':''}${late?' late':''}" style="left:${l}%;width:${w}%;--c:${PHASES[ph][1]}" title="${esc(tip)}"></i>`;
+      return `<div class="grow${on?' isdone':''}"><div class="glab"><span class="gt">${NUM[t[0]]}. ${esc(t[2])}</span><span class="gw">${esc(who)} · ${esc(fmtRange(a,b))}</span></div><div class="gtrack">${grid}${bands}${todayLine}${mark}</div></div>`;
+    }).join('');
+    el.innerHTML=`<div class="gscroll"><div class="gchart">${head}${rows}</div></div>
+      <div class="key">${Object.values(PHASES).map(p=>`<span><i class="k" style="background:${p[1]}"></i>${p[0]}</span>`).join('')}<span><i class="k" style="background:var(--red-soft)"></i>US Thanksgiving</span><span><i class="k" style="background:var(--red);width:2px"></i>Today</span><span>◆ One-day review or session</span></div>`;
+  }
   function matchWho(t){ if(f.who==='all')return true; return t[3]===f.who||coOwner[t[0]]===f.who; }
   function render(){
     const done=T.filter(t=>ticks['t'+t[0]]).length;
@@ -862,12 +971,13 @@ const SUPABASE_KEY = 'sb_publishable_dukb24tfoznTtdsoDc8x_w_roDfMAHM';
       const list=T.filter(t=>t[1]===g&&matchWho(t)&&(f.state==='all'||(f.state==='done')===!!ticks['t'+t[0]]));
       if(!list.length)return;
       const gd=T.filter(t=>t[1]===g&&ticks['t'+t[0]]).length, gt=T.filter(t=>t[1]===g).length;
-      html+=`<div class="group-h"><span>${g==='Planning'?'Planning · start here':g+' tasks'}</span><span class="sync num">${gd} of ${gt} done</span></div>`;
+      html+=`<div class="group-h"><span>${g==='Planning'?'Planning · start here':g==='Content build'?'Content build plan · with dates':g+' tasks'}</span><span class="sync num">${gd} of ${gt} done</span></div>`;
       html+=list.map(t=>{
         const on=!!ticks['t'+t[0]]; const owner=t[3]==='TBC'?'<span class="tbc">Owner TBC</span>':`Owner <b>${esc(t[3]+(coOwner[t[0]]?' / '+coOwner[t[0]]:''))}</b>`;
-        return `<div class="task${on?' done':''}"><input type="checkbox" id="cb${t[0]}" data-id="${t[0]}" ${on?'checked':''} aria-label="Mark task ${NUM[t[0]]} done"><label for="cb${t[0]}"><div class="tt">${NUM[t[0]]}. ${esc(t[2])}</div><div class="tm"><span>${owner}</span>${t[4]?`<span>Backup <b>${esc(t[4])}</b></span>`:''}<span>${esc(t[5])}</span>${INFORMED[t[0]]?`<span>Informed <b>${esc(INFORMED[t[0]])}</b></span>`:''}</div>${t[7]?`<div class="tn">${esc(t[7])}</div>`:''}</label><div class="tags">${t[0]===44?'<span class="pill soon">Kick-off agenda</span>':''}${t[3]==='TBC'?'<span class="pill red">Needs owner</span>':''}</div></div>`;
+        return `<div class="task${on?' done':''}"><input type="checkbox" id="cb${t[0]}" data-id="${t[0]}" ${on?'checked':''} aria-label="Mark task ${NUM[t[0]]} done"><label for="cb${t[0]}"><div class="tt">${NUM[t[0]]}. ${esc(t[2])}</div><div class="tm"><span>${owner}</span>${t[4]?`<span>Backup <b>${esc(t[4])}</b></span>`:''}<span>${esc(t[5])}</span>${INFORMED[t[0]]?`<span>Informed <b>${esc(INFORMED[t[0]])}</b></span>`:''}${DATES[t[0]]?`<span>Dates <b>${esc(fmtRange(DATES[t[0]][0],DATES[t[0]][1]))}</b></span>`:''}</div>${t[7]?`<div class="tn">${esc(t[7])}</div>`:''}</label><div class="tags">${DATES[t[0]]&&!on&&today>dD(DATES[t[0]][1])?'<span class="pill red">Overdue</span>':''}${DATES[t[0]]&&DATES[t[0]][3]&&!on?`<span class="pill soon">${esc(DATES[t[0]][3])}</span>`:''}${t[0]===44?'<span class="pill soon">Kick-off agenda</span>':''}${t[3]==='TBC'?'<span class="pill red">Needs owner</span>':''}</div></div>`;
       }).join('');
     });
+    renderGantt();
     $('#taskList').innerHTML=html||'<div class="empty">Nothing here with these filters. Try "All" or "Everyone".</div>';
   }
   document.querySelectorAll('.fbtn').forEach(b=>b.addEventListener('click',()=>{
