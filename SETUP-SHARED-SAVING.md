@@ -28,8 +28,10 @@ Teammate's browser ──saves──▶  hub_save function  ──▶  hub_docs
    - **Plan:** Free.
 4. Click **Create new project** and wait 1–2 minutes while it sets up.
 
-> Note: free projects pause after about a week with no activity. If that happens, open the project
-> in Supabase and click **Restore**. Nothing is lost.
+> Note: free projects pause after about a week with no activity. The GitHub workflow
+> `.github/workflows/keep-supabase-awake.yml` reads from the database every 3 days to prevent this.
+> If it pauses anyway (saving fails with "Failed to fetch"), open the project in Supabase and click
+> **Restore**. Nothing is lost.
 
 ## Step 2: Create the table (copy and paste)
 
