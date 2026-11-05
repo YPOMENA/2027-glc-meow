@@ -254,7 +254,7 @@ table.sched td .sl{display:block;font-size:11px;font-weight:600;color:var(--gold
 .tab{font:inherit;font-family:var(--display);font-weight:600;font-size:15px;color:var(--muted);background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px;margin-bottom:-1px;cursor:pointer}
 .tab[aria-selected="true"]{color:var(--blue);border-bottom-color:var(--gold)}
 .tab:focus-visible{outline:2px solid var(--azure);outline-offset:2px;border-radius:6px}
-#view-content > section:first-child,#view-meetings > section:first-child{padding-top:28px}
+#view-meetings > section:first-child{padding-top:28px}
 
 /* meetings */
 .mtg{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:12px}
@@ -314,7 +314,7 @@ footer b{color:var(--blue);font-family:var(--display)}
   <div class="wrap">
     <div class="brand">MEO Workshop · GLC 2027</div>
     <nav class="nav" aria-label="Sections">
-      <a href="#road">Road to GLC</a><a href="#calls">Calls</a><a href="#resources">Resources</a><a href="#tasks">Tasks</a><a href="#content">Content</a><a href="#meetings">Meetings</a>
+      <a href="#road">Road to GLC</a><a href="#calls">Calls</a><a href="#resources">Resources</a><a href="#tasks">Tasks</a><a href="#meetings">Meetings</a>
     </nav>
   </div>
 </header>
@@ -323,7 +323,7 @@ footer b{color:var(--blue);font-family:var(--display)}
   <div class="hero">
     <div class="eyebrow">Officer Education · Delivery Team Hub</div>
     <h1>Member Engagement Officer Workshop</h1>
-    <p class="lede">One place for the MEO delivery team: the road to GLC, team calls, shared resources, the management task list, workshop content, and meeting notes and recordings.</p>
+    <p class="lede">One place for the MEO delivery team: the road to GLC, team calls, shared resources, the task list and timeline, and meeting notes and recordings.</p>
     <div class="chips">
       <span class="chip"><b>Management Partners</b> · Niloma, Mandi, Tamara, Jennifer</span>
       <span class="chip"><b>Champions</b> · Jill Nykoliation, Marios Kalochoritis, Ben Chong, Mia Feasey</span>
@@ -334,7 +334,7 @@ footer b{color:var(--blue);font-family:var(--display)}
 
   <div class="tabs" role="tablist" aria-label="Hub views">
     <button class="tab" role="tab" id="tab-hub" aria-controls="view-hub" aria-selected="true" data-view="hub">Planning hub</button>
-    <button class="tab" role="tab" id="tab-content" aria-controls="view-content" aria-selected="false" data-view="content">Workshop content</button>
+    
     <button class="tab" role="tab" id="tab-meetings" aria-controls="view-meetings" aria-selected="false" data-view="meetings">Meeting notes &amp; recordings</button>
   </div>
   <div id="view-hub" role="tabpanel" aria-labelledby="tab-hub">
@@ -454,74 +454,6 @@ footer b{color:var(--blue);font-family:var(--display)}
   </section>
 
   </div>
-  <div id="view-content" role="tabpanel" aria-labelledby="tab-content" hidden>
-  <!-- CONTENT -->
-  <section id="content">
-    <div class="sec-head"><div class="eyebrow">Workshop content · FY27 outline</div><span class="sync">Source: MEOW Excel, Agenda tab</span></div>
-    <div class="card" style="margin-bottom:16px">
-      <h2 style="font-size:20px;margin-bottom:8px">Objective</h2>
-      <p style="margin:0;max-width:72ch">Equip Member Engagement Officers to lead engagement as a strategic driver of chapter health, member value and retention, using insight, experience design, inclusive community-building and data to deliver measurable outcomes.</p>
-    </div>
-    <div class="grid2">
-      <div class="card">
-        <div class="eyebrow" style="margin-bottom:6px">Modules · minutes</div>
-        <div class="agenda" id="agenda"></div>
-      </div>
-      <div style="display:grid;gap:16px;align-content:start">
-        <div class="card">
-          <div class="eyebrow">How the 480 minutes are delivered</div>
-          <div class="stack" id="stack" role="img" aria-label="Delivery method split of the 480 core minutes"></div>
-          <div class="legend" id="legend"></div>
-        </div>
-        <div class="card res">
-          <h3>Highest expected engagement</h3>
-          <ul>
-            <li><span class="rt">Member Journey &amp; Experience Design</span></li>
-            <li><span class="rt">Chapter Health &amp; Dashboard Challenge</span></li>
-            <li><span class="rt">Disengagement Intervention Lab</span></li>
-            <li><span class="rt">Forum, Peerdom &amp; Belonging conversations</span></li>
-            <li><span class="rt">Member Panel / Peer Problem-Solving</span></li>
-            <li><span class="rt">Strategic Planning &amp; 30-60-90 Execution</span></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- NOTES -->
-  <section id="notes">
-    <div class="sec-head"><div class="eyebrow">Content notes</div></div>
-
-    <details class="note" open>
-      <summary><span class="pill proj">Workshop success tips</span><h3>Lessons from past MEO workshops · Pietro</h3><span class="tog"></span></summary>
-      <div class="note-body">
-        <div class="grid2">
-          <div><h4>What worked well</h4><ul><li>Practical engagement ideas and examples from other chapters.</li><li>A clearer view of the officer's role in onboarding, connection and retention.</li><li>Strong energy and peer sharing; people left with actionable concepts.</li></ul></div>
-          <div><h4>What to improve</h4><ul><li>More concrete case studies and proven chapter practices, less theory.</li><li>More consistent facilitation; tailor examples to different chapter contexts.</li><li>More practical tools for disengagement, onboarding and member experience.</li></ul></div>
-        </div>
-        <div><h4>Using data in the workshop</h4><ul><li>YPO is data rich: members, engagement, forums, events, learning, chapters.</li><li>Use dashboards, survey findings and benchmarks to bring content to life and prompt discussion.</li><li>Make sure participants know what data exists and how to access it during their year.</li><li>The management team coordinates with the Senior Director of Data &amp; Insights where extra expertise helps.</li></ul></div>
-      </div>
-    </details>
-
-    <details class="note">
-      <summary><span class="pill opt">Membership Team</span><h3>Optional modules proposed for FY27 · 115 min outside the core</h3><span class="tog"></span></summary>
-      <div class="note-body">
-        <div class="tbl-wrap"><table>
-          <thead><tr><th>Module</th><th>What it covers</th><th>Min</th></tr></thead>
-          <tbody>
-            <tr><td><b>FY27 Onboarding Journey &amp; Resources</b></td><td>First 24 months, Onboarding Hub, new member emails, Chapter Onboarding Toolkit</td><td class="num">25</td></tr>
-            <tr><td><b>Apeiron Member Experience</b></td><td>Member-led, 6–8 slides; connect Apeiron to chapter onboarding</td><td class="num">30</td></tr>
-            <tr><td><b>Creating Belonging in Chapters</b></td><td>Welcome–Connect–Engage–Measure framework; barriers to belonging</td><td class="num">35</td></tr>
-            <tr><td><b>Inclusion Data &amp; Application Lab</b></td><td>Chapter Inclusion Survey, participation gaps, four case studies, 90-day reflection</td><td class="num">25</td></tr>
-          </tbody>
-        </table></div>
-        <p class="muted" style="margin:0;font-size:14px">Decision needed: select, shorten or fold these into the core as priorities allow.</p>
-      </div>
-    </details>
-  </section>
-
-  </div>
-
   <div id="view-meetings" role="tabpanel" aria-labelledby="tab-meetings" hidden>
   <section id="meetings">
     <div class="sec-head"><div class="eyebrow">Meeting notes &amp; recordings</div><span class="sync" id="mtgNote">Loading…</span></div>
@@ -550,10 +482,10 @@ const SUPABASE_KEY = 'sb_publishable_dukb24tfoznTtdsoDc8x_w_roDfMAHM';
   const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
   // View tabs
-  const VIEWS={hub:['road','calls','resources','tasks'],content:['content','notes'],meetings:['meetings']};
+  const VIEWS={hub:['road','calls','resources','tasks'],meetings:['meetings']};
   function showView(v,scrollTo){
     document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.view===v));
-    $('#view-hub').hidden=v!=='hub'; $('#view-content').hidden=v!=='content'; $('#view-meetings').hidden=v!=='meetings';
+    $('#view-hub').hidden=v!=='hub'; $('#view-meetings').hidden=v!=='meetings';
     try{localStorage.setItem('meo-view',v)}catch(e){}
     if(scrollTo){const el=document.getElementById(scrollTo); if(el) el.scrollIntoView({behavior:'smooth',block:'start'});}
   }
@@ -770,34 +702,6 @@ const SUPABASE_KEY = 'sb_publishable_dukb24tfoznTtdsoDc8x_w_roDfMAHM';
   try{MTG=JSON.parse(localStorage.getItem('meo-mtg')||'{}')}catch(e){}
   renderMeetings();
 
-
-  // Agenda
-  const mods=[
-    ['Introduction / Icebreaker','Connection and current engagement priorities',10],
-    ['House Keeping','Objectives, agenda, Parking Lot, quick poll',10],
-    ['Member Engagement Officer Journey','Coordinator to strategic leader; maturity assessment; role map',45],
-    ['Designing Exceptional Member Experiences','Journey mapping, first 90 days, personas, disengagement lab',85],
-    ['FY27 Onboarding Journey & Resources','Membership Team · optional',25,1],
-    ['Apeiron Member Experience','Membership Team · optional',30,1],
-    ['Measuring & Improving Chapter Health','Dashboards, Engagement Compass, scorecard, benchmarking',60],
-    ['Building High-Performing Member Communities','Forum, Peerdom, belonging, SMP, peer practice',60],
-    ['Creating Belonging in Chapters','Membership Team · optional',35,1],
-    ['Inclusion Data & Application Lab','Membership Team · optional',25,1],
-    ['Future-Proofing Member Engagement','Member expectations, AI use cases, Stop / Start / Scale',45],
-    ['Strategic Planning','FY27 engagement strategy, Future Headlines, SMART goals',50],
-    ['Commitments','30-60-90 plan, accountability partner, reflection card',35],
-    ['Member Panel / Peer Exchange','Panel, Ask-Me-Anything, Hot Seat',30],
-    ['Community Standards','Peerdom, belonging and conduct; governance Q&A',20],
-    ['Global / Member Engagement Updates','FY27 update and "what changes for my chapter?"',30]
-  ];
-  const mx=85;
-  $('#agenda').innerHTML=mods.map(m=>`<div class="mod${m[3]?' opt':''}"><div class="mn">${esc(m[0])}</div><div class="mc">${esc(m[1])}</div><div class="mm num">${m[2]}</div><div class="mbar"><i style="width:${m[2]/mx*100}%"></i></div></div>`).join('')
-    +`<div class="mod"><div class="mn">Energizers</div><div class="mc">Distributed through the day</div><div class="mm" style="font-size:12px">Throughout</div></div>`;
-
-  // Delivery split
-  const split=[['Discussion',117,'var(--blue)'],['Workbook',110,'var(--azure)'],['Activity',98,'var(--gold)'],['Case study',50,'var(--green)'],['Talk time',25,'var(--muted)'],['Needs & Leads',25,'var(--red)'],['Live demo',20,'var(--opt-ink)'],['Panel',20,'var(--line)'],['Speaker',15,'var(--ink)']];
-  $('#stack').innerHTML=split.map(s=>`<span style="width:${s[1]/480*100}%;background:${s[2]}" title="${s[0]}: ${s[1]} min"></span>`).join('');
-  $('#legend').innerHTML=split.map(s=>`<div><i style="background:${s[2]}"></i>${s[0]}<b>${s[1]}</b></div>`).join('');
 
   // Tasks from RACI v2: [id, group, task, owner, backup, workstream, gray, note]
   // Task tracker (MEOW_Task_Tracker.xlsx): [#, section, sub-group, task, responsible, backup, start, end, done in the sheet, notes]
