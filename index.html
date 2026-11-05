@@ -177,7 +177,17 @@ td.who{font-weight:700;color:var(--blue)}
 .task .tm{font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:3px}
 .task .tm b{color:var(--ink);font-weight:700}
 .task .tn{font-size:12.5px;color:var(--muted);margin-top:4px;font-style:italic}
-.task .tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.task .tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
+.linkbtn{font:inherit;font-size:12.5px;font-weight:700;color:var(--azure);background:none;border:0;padding:2px 4px;cursor:pointer;text-transform:none;letter-spacing:0}
+.linkbtn:hover{text-decoration:underline}
+.linkbtn:focus-visible{outline:2px solid var(--azure);outline-offset:1px;border-radius:4px}
+.tform{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px 12px;padding:14px;margin:8px 0;border:1px solid var(--azure);border-radius:12px;background:var(--paper-2)}
+.tform label{display:grid;gap:4px;font-size:12px;font-weight:700;color:var(--muted);min-width:0}
+.tform .wide{grid-column:1/-1}
+.tform input,.tform select{font:inherit;font-size:14px;font-weight:400;width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--card);color:var(--ink);min-width:0}
+.tform input:focus,.tform select:focus{outline:2px solid var(--azure);outline-offset:1px}
+.btn.danger{color:var(--red);border-color:var(--red-soft)}
+@media (max-width:700px){.tform{grid-template-columns:repeat(2,minmax(0,1fr))}}
 /* gantt */
 .gscroll{overflow-x:auto;margin:0 -4px;padding:0 4px}
 .gchart{min-width:820px}
@@ -439,7 +449,7 @@ footer b{color:var(--blue);font-family:var(--display)}
         <button class="fbtn" data-f="who" data-v="TBC" aria-pressed="false">Unassigned</button>
       </div>
       <div id="taskList"></div>
-      <p class="muted" style="font-size:13px;margin:16px 0 0"><b>Owner</b> = Responsible (does the work). <b>Backup</b> = Accountable (checks it's done, steps in).</p>
+      <p class="muted" style="font-size:13px;margin:16px 0 0"><b>Owner</b> = Responsible (does the work). <b>Backup</b> = Accountable (checks it's done, steps in). Tick a box to mark a task done; use <b>Edit</b> or <b>+ Add task</b> to change the list. Changes save for everyone.</p>
     </div>
   </section>
 
@@ -874,11 +884,31 @@ const SUPABASE_KEY = 'sb_publishable_dukb24tfoznTtdsoDc8x_w_roDfMAHM';
     if(a===b) return A.toLocaleDateString('en-GB',{weekday:'short',...o});
     const ys=A.getFullYear()!==B.getFullYear();
     return A.toLocaleDateString('en-GB',ys?{...o,year:'numeric'}:(A.getMonth()===B.getMonth()?{day:'numeric'}:o))+'–'+B.toLocaleDateString('en-GB',ys?{...o,year:'numeric'}:o);};
-  const tkey=t=>'k'+t[0];
+  // Tasks are edited on the site: the sheet above is the starting point, and edits are saved per task
+  // (doc 'e<id>' in the shared 'ticks' collection, so no database change is needed). New tasks get ids 'n<time>'.
+  const BASE=TASKS.map((t,i)=>({id:String(t[0]),sec:t[1],sub:t[2],task:t[3],resp:t[4],backup:t[5],start:t[6],end:t[7],sheetDone:!!t[8],note:t[9],ord:i}));
+  const BASE_IDS=new Set(BASE.map(t=>t.id));
+  const PEOPLE_OPTS=['Niloma','Tamara','Mandi','Jennifer','Champions','Shared','Everyone','Each person','TBC'];
+  let EDITS={}; try{EDITS=JSON.parse(localStorage.getItem('meo-task-edits')||'{}')}catch(e){}
+  let taskEditing=null; let LIST=[];
+  const tkey=t=>'k'+t.id;
   let ticks={}; const f={state:'open',who:'all'}; let db=null; let local=true;
   // A tick saved on the site wins; otherwise use the sheet's Done status
-  const isDone=t=>Object.prototype.hasOwnProperty.call(ticks,tkey(t))?!!ticks[tkey(t)]:!!t[8];
-  const isLate=t=>!isDone(t)&&isISO(t[7])&&today>dD(t[7]);
+  const isDone=t=>Object.prototype.hasOwnProperty.call(ticks,tkey(t))?!!ticks[tkey(t)]:!!t.sheetDone;
+  const isLate=t=>!isDone(t)&&isISO(t.end)&&today>dD(t.end);
+  function buildList(){
+    const subOrder={}; BASE.forEach(t=>{const k=t.sec+'|'+t.sub; if(!(k in subOrder)) subOrder[k]=Object.keys(subOrder).length;});
+    const all=BASE.map(b=>EDITS[b.id]?{...b,...EDITS[b.id]}:b)
+      .concat(Object.entries(EDITS).filter(([id])=>!BASE_IDS.has(id)).map(([id,v],i)=>({id,sheetDone:false,ord:1e4+i,...v})))
+      .filter(t=>!t.deleted&&t.task);
+    const sk=d=>isISO(d)?d:'9999';
+    const list=[];
+    SECS.forEach(([sec])=>{
+      all.filter(t=>t.sec===sec).sort((a,b)=>((subOrder[a.sec+'|'+a.sub]??999)-(subOrder[b.sec+'|'+b.sub]??999))||sk(a.start).localeCompare(sk(b.start))||sk(a.end).localeCompare(sk(b.end))||a.ord-b.ord).forEach(t=>list.push(t));
+    });
+    list.forEach((t,i)=>t.n=i+1);
+    return list;
+  }
   // Supabase adapter with the same shape as the claude db: collection(name).doc(id).set(data) and
   // collection(name).onSnapshot(cb,err). Reads the hub_docs table; writes go through the hub_save
   // database function. Refreshes every 20s and when the tab regains focus.
@@ -919,50 +949,102 @@ const SUPABASE_KEY = 'sb_publishable_dukb24tfoznTtdsoDc8x_w_roDfMAHM';
     const head=`<div class="grow ghead"><div class="glab"></div><div class="gtrack">${months.map(m=>`<span class="gmon" style="left:${(m-g0)/span*100}%">${m.toLocaleDateString('en-GB',{month:'short'})}${m.getMonth()===0?' ’'+String(m.getFullYear()).slice(2):''}</span>`).join('')}</div></div>`;
     let rows='';
     SECS.forEach(([sec,col])=>{
-      const list=TASKS.filter(t=>t[1]===sec); if(!list.length) return;
+      const list=LIST.filter(t=>t.sec===sec); if(!list.length) return;
       rows+=`<div class="grow gsec"><div class="glab"><span class="gs" style="--c:${col}">${esc(sec)}</span></div><div class="gtrack">${grid}${bands}${todayLine}</div></div>`;
       rows+=list.map(t=>{
-        const [a,b]=[t[6],t[7]]; const on=isDone(t); const late=isLate(t);
+        const [a,b]=[t.start,t.end]; const on=isDone(t); const late=isLate(t);
         let mark;
         if(isISO(a)&&isISO(b)){
           const l=pos(a), w=Math.max(pos(b)-l+day,0.4);
-          const tip=`${t[0]}. ${t[3]} · ${t[4]} · ${fmtRange(a,b)}${on?' · done':late?' · overdue':''}`;
+          const tip=`${t.n}. ${t.task} · ${t.resp} · ${fmtRange(a,b)}${on?' · done':late?' · overdue':''}`;
           mark=a===b?`<i class="gdot${on?' done':''}" style="left:${l}%;--c:${col}" title="${esc(tip)}"></i>`
             :`<i class="gbar${on?' done':''}${late?' late':''}" style="left:${l}%;width:${w}%;--c:${col}" title="${esc(tip)}"></i>`;
         } else mark=`<span class="gtbd">${esc(a||'No date')}</span>`;
-        return `<div class="grow${on?' isdone':''}"><div class="glab"><span class="gt">${t[0]}. ${esc(t[3])}</span><span class="gw">${esc(t[4])}${t[2]?' · '+esc(t[2]):''} · ${esc(fmtRange(a,b)||'No date')}</span></div><div class="gtrack">${grid}${bands}${todayLine}${mark}</div></div>`;
+        return `<div class="grow${on?' isdone':''}"><div class="glab"><span class="gt">${t.n}. ${esc(t.task)}</span><span class="gw">${esc(t.resp)}${t.sub?' · '+esc(t.sub):''} · ${esc(fmtRange(a,b)||'No date')}</span></div><div class="gtrack">${grid}${bands}${todayLine}${mark}</div></div>`;
       }).join('');
     });
     el.innerHTML=`<div class="gscroll"><div class="gchart">${head}${rows}</div></div>
       <div class="key">${SECS.map(p=>`<span><i class="k" style="background:${p[1]}"></i>${p[0]}</span>`).join('')}<span><i class="k" style="background:var(--red-soft)"></i>US Thanksgiving</span><span><i class="k" style="background:var(--red);width:2px"></i>Today</span><span>◆ One-day task</span><span><i class="k" style="outline:2px solid var(--red)"></i>Overdue</span></div>`;
   }
   const SHARED=['Shared','Everyone','Each person'];
-  function matchWho(t){ if(f.who==='all')return true; if(f.who==='Shared') return SHARED.includes(t[4]); return t[4]===f.who; }
+  function matchWho(t){ if(f.who==='all')return true; if(f.who==='Shared') return SHARED.includes(t.resp); return t.resp===f.who; }
+  const opt=(arr,v)=>arr.map(o=>`<option${o===v?' selected':''}>${esc(o)}</option>`).join('');
+  function taskForm(t){
+    const subs=[...new Set(LIST.filter(x=>x.sec===t.sec).map(x=>x.sub).filter(Boolean))];
+    const id=esc(t.id);
+    return `<div class="tform" data-id="${id}">
+      <label class="wide">Task<input data-f="task" value="${esc(t.task||'')}" placeholder="What needs doing"></label>
+      <label>Section<select data-f="sec">${opt(SECS.map(s=>s[0]),t.sec)}</select></label>
+      <label>Part<input data-f="sub" list="subs-${id}" value="${esc(t.sub||'')}" placeholder="e.g. Comms"><datalist id="subs-${id}">${subs.map(x=>`<option value="${esc(x)}">`).join('')}</datalist></label>
+      <label>Responsible<select data-f="resp">${opt(PEOPLE_OPTS,t.resp||'TBC')}</select></label>
+      <label>Backup<input data-f="backup" value="${esc(t.backup||'')}"></label>
+      <label>Start<input type="date" data-f="start" value="${isISO(t.start)?t.start:''}"></label>
+      <label>End<input type="date" data-f="end" value="${isISO(t.end)?t.end:''}"></label>
+      <label>No dates yet?<input data-f="when" value="${!isISO(t.start)&&t.start?esc(t.start):''}" placeholder="e.g. TBD Feb"></label>
+      <label class="wide">Notes<input data-f="note" value="${esc(t.note||'')}"></label>
+      <div class="btnrow wide"><button type="button" class="btn primary" data-tact="save" data-id="${id}">Save</button><button type="button" class="btn" data-tact="cancel">Cancel</button>${t.isNew?'':`<button type="button" class="btn danger" data-tact="delete" data-id="${id}">Delete task</button>`}<span class="sync" id="tst-${id}"></span></div>
+    </div>`;
+  }
   function render(){
-    const done=TASKS.filter(isDone).length;
-    $('#kDone').textContent=done; $('#kTot').textContent=TASKS.length;
-    const pct=Math.round(done/TASKS.length*100); $('#kPct').textContent=pct+'%'; $('#kBar').style.width=pct+'%';
+    LIST=buildList();
+    const done=LIST.filter(isDone).length;
+    $('#kDone').textContent=done; $('#kTot').textContent=LIST.length;
+    const pct=LIST.length?Math.round(done/LIST.length*100):0; $('#kPct').textContent=pct+'%'; $('#kBar').style.width=pct+'%';
     let html='';
     SECS.forEach(([g])=>{
-      const list=TASKS.filter(t=>t[1]===g&&matchWho(t)&&(f.state==='all'||(f.state==='done')===isDone(t)));
-      if(!list.length)return;
-      const all=TASKS.filter(t=>t[1]===g); const gd=all.filter(isDone).length;
-      html+=`<div class="group-h"><span>${esc(g)}</span><span class="sync num">${gd} of ${all.length} done</span></div>`;
+      const list=LIST.filter(t=>t.sec===g&&(t.id===taskEditing||(matchWho(t)&&(f.state==='all'||(f.state==='done')===isDone(t)))));
+      const all=LIST.filter(t=>t.sec===g); const gd=all.filter(isDone).length;
+      html+=`<div class="group-h"><span>${esc(g)}</span><span class="sync num">${gd} of ${all.length} done · <button type="button" class="linkbtn" data-tact="add" data-sec="${esc(g)}">+ Add task</button></span></div>`;
+      if(taskEditing&&taskEditing.startsWith('new:')&&taskEditing.slice(4)===g) html+=taskForm({id:'new',isNew:true,sec:g,resp:'TBC'});
       html+=list.map(t=>{
-        const on=isDone(t); const owner=t[4]==='TBC'?'<span class="tbc">Owner TBC</span>':`Owner <b>${esc(t[4])}</b>`;
-        const dates=fmtRange(t[6],t[7]);
-        return `<div class="task${on?' done':''}"><input type="checkbox" id="cb${t[0]}" data-id="${t[0]}" ${on?'checked':''} aria-label="Mark task ${t[0]} done"><label for="cb${t[0]}"><div class="tt">${t[0]}. ${esc(t[3])}</div><div class="tm"><span>${owner}</span>${t[5]?`<span>Backup <b>${esc(t[5])}</b></span>`:''}${t[2]?`<span>${esc(t[2])}</span>`:''}${dates?`<span>Dates <b>${esc(dates)}</b></span>`:''}</div>${t[9]?`<div class="tn">${esc(t[9])}</div>`:''}</label><div class="tags">${isLate(t)?'<span class="pill red">Overdue</span>':''}${!on&&isISO(t[6])&&isISO(t[7])&&today>=dD(t[6])&&today<=dD(t[7])?'<span class="pill soon">In progress</span>':''}${t[4]==='TBC'?'<span class="pill red">Needs owner</span>':''}</div></div>`;
+        if(t.id===taskEditing) return taskForm(t);
+        const on=isDone(t); const owner=t.resp==='TBC'?'<span class="tbc">Owner TBC</span>':`Owner <b>${esc(t.resp)}</b>`;
+        const dates=fmtRange(t.start,t.end);
+        return `<div class="task${on?' done':''}"><input type="checkbox" id="cb${esc(t.id)}" data-id="${esc(t.id)}" ${on?'checked':''} aria-label="Mark task ${t.n} done"><label for="cb${esc(t.id)}"><div class="tt">${t.n}. ${esc(t.task)}</div><div class="tm"><span>${owner}</span>${t.backup?`<span>Backup <b>${esc(t.backup)}</b></span>`:''}${t.sub?`<span>${esc(t.sub)}</span>`:''}${dates?`<span>Dates <b>${esc(dates)}</b></span>`:''}</div>${t.note?`<div class="tn">${esc(t.note)}</div>`:''}</label><div class="tags">${isLate(t)?'<span class="pill red">Overdue</span>':''}${!on&&isISO(t.start)&&isISO(t.end)&&today>=dD(t.start)&&today<=dD(t.end)?'<span class="pill soon">In progress</span>':''}${t.resp==='TBC'?'<span class="pill red">Needs owner</span>':''}<button type="button" class="linkbtn" data-tact="edit" data-id="${esc(t.id)}" aria-label="Edit task ${t.n}">Edit</button></div></div>`;
       }).join('');
     });
     renderGantt();
-    $('#taskList').innerHTML=html||'<div class="empty">Nothing here with these filters. Try "All" or "Everyone".</div>';
+    $('#taskList').innerHTML=html;
+    if(!LIST.some(t=>matchWho(t)&&(f.state==='all'||(f.state==='done')===isDone(t)))&&!taskEditing) $('#taskList').insertAdjacentHTML('beforeend','<div class="empty">Nothing here with these filters. Try "All" or "Everyone".</div>');
   }
+  async function saveEdit(id,data,st){
+    if(db){ await db.collection('ticks').doc('e'+id).set(data); }
+    EDITS[id]=data; try{localStorage.setItem('meo-task-edits',JSON.stringify(EDITS))}catch(e){}
+  }
+  $('#taskList').addEventListener('click',async e=>{
+    const b=e.target.closest('[data-tact]'); if(!b) return; const act=b.dataset.tact;
+    if(act==='edit'){ taskEditing=b.dataset.id; render(); const i=document.querySelector('.tform input[data-f="task"]'); if(i) i.focus(); return; }
+    if(act==='add'){ taskEditing='new:'+b.dataset.sec; render(); const i=document.querySelector('.tform input[data-f="task"]'); if(i) i.focus(); return; }
+    if(act==='cancel'){ taskEditing=null; render(); return; }
+    const form=b.closest('.tform'); const id=form.dataset.id; const st=form.querySelector('.sync');
+    const t=LIST.find(x=>x.id===id)||{};
+    if(act==='delete'){
+      if(!confirm(`Delete "${t.task}" for everyone?`)) return;
+      try{ b.disabled=true; st.textContent='Deleting…'; await saveEdit(id,{...(EDITS[id]||{}),deleted:true,at:new Date().toISOString()}); }
+      catch(err){ b.disabled=false; st.textContent='Could not delete ('+String(err&&err.message||err).slice(0,120)+')'; return; }
+      taskEditing=null; render(); return;
+    }
+    if(act==='save'){
+      const v=k=>form.querySelector(`[data-f="${k}"]`).value.trim();
+      const task=v('task'); if(!task){ st.textContent='Please give the task a name.'; return; }
+      let start=v('start'), end=v('end'); const when=v('when');
+      if(start&&!end) end=start; if(end&&!start) start=end;
+      if(start&&end&&end<start){ st.textContent='The end date is before the start date.'; return; }
+      if(!start&&!end&&when){ start=when; end=when; }
+      const data={task,sec:v('sec'),sub:v('sub'),resp:v('resp'),backup:v('backup'),start,end,note:v('note'),at:new Date().toISOString()};
+      const newId=id==='new'?'n'+Date.now().toString(36):id;
+      try{ b.disabled=true; st.textContent='Saving…'; await saveEdit(newId,data); }
+      catch(err){ b.disabled=false; st.textContent='Could not save ('+String(err&&err.message||err).slice(0,120)+')'; return; }
+      taskEditing=null; render();
+    }
+  });
   document.querySelectorAll('.fbtn').forEach(b=>b.addEventListener('click',()=>{
     f[b.dataset.f]=b.dataset.v;
     document.querySelectorAll(`.fbtn[data-f="${b.dataset.f}"]`).forEach(x=>x.setAttribute('aria-pressed',x===b));
     render();
   }));
   $('#taskList').addEventListener('change',async e=>{
+    if(e.target.type!=='checkbox') return;
     const id=e.target.dataset.id; if(!id)return; const on=e.target.checked; const key='k'+id;
     ticks[key]=on; render();
     if(db){ try{ await db.collection('ticks').doc(key).set({done:on,at:new Date().toISOString()}); }
@@ -984,8 +1066,9 @@ const SUPABASE_KEY = 'sb_publishable_dukb24tfoznTtdsoDc8x_w_roDfMAHM';
       rsvp=r; ($('#rsvpNote')||{}).textContent='Shared with the whole team'; renderSched();
     },()=>{ ($('#rsvpNote')||{}).textContent='Shared updates unavailable right now'; });
     db.collection('ticks').onSnapshot(snap=>{
-      const t={}; snap.docs.forEach(d=>{const v=d.data(); if(v&&/^k\d+$/.test(d.id)) t[d.id]=!!v.done;});
-      ticks=t; local=false; $('#syncNote').textContent='Ticks are shared with the whole team'; render();
+      const t={}, ed={}; snap.docs.forEach(d=>{const v=d.data(); if(!v) return;
+        if(/^k[0-9a-z]+$/.test(d.id)) t[d.id]=!!v.done; else if(/^e[0-9a-z]+$/.test(d.id)) ed[d.id.slice(1)]=v;});
+      ticks=t; EDITS=ed; local=false; $('#syncNote').textContent='Ticks and edits are shared with the whole team'; if(!taskEditing) render();
     },()=>{ $('#syncNote').textContent='Shared ticks unavailable right now'; });
   })();
 })();
