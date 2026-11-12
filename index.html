@@ -225,6 +225,7 @@ td.who{font-weight:700;color:var(--blue)}
 .next li.o{color:var(--red);text-decoration:line-through}
 .next li.e span:last-child{color:var(--gold);font-weight:700}
 .slots{margin:6px 0 0;padding-left:18px;display:grid;gap:4px;font-size:14px}
+.slots li.past-call{text-decoration:line-through}
 .tz{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12.5px;color:var(--muted);margin-top:2px}
 .tz b{font-weight:600;color:var(--ink)} .tz .odd b{color:var(--gold)}
 table.sched{min-width:760px;font-size:13.5px}
@@ -592,7 +593,7 @@ const SUPABASE_KEY = 'sb_publishable_dukb24tfoznTtdsoDc8x_w_roDfMAHM';
   }
   renderSched();
   $('#callList').innerHTML=CALLS.map(c=>{const d=new Date(c.start).toLocaleString('en-GB',{timeZone:'Asia/Dubai',weekday:'short',day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true});
-    return `<li class="${isPast(c)?'muted':''}"><b>${esc((c.title||'').replace(/^MEOW GLC (Content: )?/,'').replace(' (Cohorts A & B)',''))}</b> · ${esc(d)} Dubai${c.zoom?` · <a href="${esc(c.zoom)}" target="_blank" rel="noopener">Zoom</a>`:''}${zoneTimes(c)}</li>`;}).join('');
+    return `<li class="${isPast(c)?'muted past-call':''}"><b>${esc((c.title||'').replace(/^MEOW GLC (Content: )?/,'').replace(' (Cohorts A & B)',''))}</b> · ${esc(d)} Dubai${c.zoom?` · <a href="${esc(c.zoom)}" target="_blank" rel="noopener">Zoom</a>`:''}${zoneTimes(c)}</li>`;}).join('');
   if($('#sched')) $('#sched').addEventListener('click',async e=>{
     const b=e.target.closest('button.cell'); if(!b||b.disabled)return; const k=b.dataset.k; const out=!rsvp[k];
     if(out)rsvp[k]=true; else delete rsvp[k]; renderSched();
