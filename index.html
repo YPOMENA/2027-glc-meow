@@ -116,6 +116,7 @@ section{padding-block:40px 0}
 .res ul{list-style:none;margin:0;padding:0;display:grid}
 .res li{padding-block:10px;border-top:1px solid var(--line);display:grid;gap:2px}
 .res li:first-child{border-top:0}
+.res li.sub{border-top:0;padding:0 0 10px 16px;margin-top:-4px;border-left:2px solid var(--line);margin-left:2px}
 .res .rt{font-weight:700;color:var(--ink);font-size:14px}
 .res a.rt{color:var(--azure);text-decoration:none}
 .res a.rt:hover{text-decoration:underline}
@@ -388,21 +389,13 @@ footer b{color:var(--blue);font-family:var(--display)}
   <!-- RESOURCES -->
   <section id="resources">
     <div class="sec-head"><div class="eyebrow">Resources &amp; presentations</div></div>
-    <div style="margin-bottom:16px">
-      <div class="card res">
-        <h3>Shared spaces</h3>
-        <ul>
-          <li><a class="rt" href="https://youngpresidentsorg-my.sharepoint.com/:w:/g/personal/tamara_crowhurst_ypo_org/IQAXams9cJEPQ7x8nwAiQgEpASGDHjoo81UtazKdD9TrTtY?e=hIRGMQ" target="_blank" rel="noopener">Session Outline</a><span class="rs">Word document · SharePoint</span></li>
-          <li><a class="rt" href="https://youngpresidentsorg-my.sharepoint.com/:f:/g/personal/tamara_crowhurst_ypo_org/IgB59NcL_l5cR5IComSv5DAuAUZlo-wiasDnBHBS_yTnQpw?e=eAYfLQ" target="_blank" rel="noopener">Previous GLC content &amp; decks</a><span class="rs">Folder · SharePoint</span></li>
-          <li><a class="rt" href="https://youngpresidentsorg-my.sharepoint.com/:f:/r/personal/tamara_crowhurst_ypo_org/Documents/FY26-27/GLC/Previous%20Surveys%20%26%20Evaluations?d=w8143696f045b460bacd12eb2fb3ed21c&amp;csf=1&amp;web=1&amp;e=nz2PRn" target="_blank" rel="noopener">Previous GLC surveys &amp; evaluations</a><span class="rs">Folder · SharePoint</span></li>
-        </ul>
-      </div>
-    </div>
     <div class="grid2">
       <div class="card res">
         <h3>Content &amp; past learning</h3>
         <ul>
-          <li><span class="rt">FY27 MEO in-person workshop outline</span><span class="rs">Objective, outcomes, modules, recommended focus areas</span><span class="pill proj">Project</span></li>
+          <li><a class="rt" href="https://youngpresidentsorg-my.sharepoint.com/:w:/g/personal/tamara_crowhurst_ypo_org/IQAXams9cJEPQ7x8nwAiQgEpASGDHjoo81UtazKdD9TrTtY?e=hIRGMQ" target="_blank" rel="noopener">FY27 MEO in-person workshop outline</a><span class="rs">Session outline: objective, outcomes, modules, recommended focus areas · SharePoint</span></li>
+          <li><a class="rt" href="https://youngpresidentsorg-my.sharepoint.com/:f:/g/personal/tamara_crowhurst_ypo_org/IgB59NcL_l5cR5IComSv5DAuAUZlo-wiasDnBHBS_yTnQpw?e=eAYfLQ" target="_blank" rel="noopener">Previous GLC content &amp; decks</a><span class="rs">Folder · SharePoint</span></li>
+          <li><a class="rt" href="https://youngpresidentsorg-my.sharepoint.com/:f:/r/personal/tamara_crowhurst_ypo_org/Documents/FY26-27/GLC/Previous%20Surveys%20%26%20Evaluations?d=w8143696f045b460bacd12eb2fb3ed21c&amp;csf=1&amp;web=1&amp;e=nz2PRn" target="_blank" rel="noopener">Previous GLC surveys &amp; evaluations</a><span class="rs">Folder · SharePoint</span></li>
           <li><span class="rt">Workshop Success Tips (Pietro)</span><span class="rs">Lessons from past MEO workshops; using Data &amp; Insights</span><span class="pill proj">Project</span></li>
           <li><a class="rt" href="https://youngpresidentsorg.sharepoint.com/sites/LeadershipDevelopmentDept/Shared%20Documents/Forms/AllItems.aspx?viewid=50bd3965%2D998d%2D4aeb%2Da73c%2D98219848a4eb&amp;id=%2Fsites%2FLeadershipDevelopmentDept%2FShared%20Documents%2FOfficer%20Education%20Materials%2FFY25%2D26%20%2D%20CURRENT%2FWorkshop%20Delivery%20Team%20materials%2FIce%20Breakers%2C%20Energizers%2C%20Common%20Challenges%2C%20Refocusing%20Ideas%20for%20GLC%2Epdf&amp;parent=%2Fsites%2FLeadershipDevelopmentDept%2FShared%20Documents%2FOfficer%20Education%20Materials%2FFY25%2D26%20%2D%20CURRENT%2FWorkshop%20Delivery%20Team%20materials" target="_blank" rel="noopener">Ice Breakers, Energizers &amp; Refocusing Ideas</a><span class="rs">WDT materials on SharePoint</span></li>
           <li><a class="rt" href="https://event.ypo.org/event/5c6b3a13-42e9-491d-a531-d9b9fc785d8f/apeiron-events-calendar?i=c9uJvSuYO0ug-ls0alILbg" target="_blank" rel="noopener">Apeiron events calendar</a><span class="rs">For the optional Apeiron Member Experience module</span></li>
@@ -416,7 +409,7 @@ footer b{color:var(--blue);font-family:var(--display)}
         <h3>Presentations &amp; participant materials</h3>
         <ul>
           <li><span class="rt">MEOW 2027 workshop deck</span><span class="rs">Built in Canva · Content &amp; Workshop Canva: Mandi (backup Jenn)</span><span class="pill soon">Coming soon</span></li>
-          <li><a class="rt" href="https://canva.link/026ie2nse8f3mvu" target="_blank" rel="noopener">DRAFT Day 1 Slides</a><span class="rs">Canva · Mandi</span><span class="pill gray">Draft</span></li>
+          <li class="sub"><a class="rt" href="https://canva.link/026ie2nse8f3mvu" target="_blank" rel="noopener">DRAFT Day 1 Slides (Bangkok)</a><span class="rs">Canva · Mandi</span><span class="pill gray">Draft</span></li>
           <li><span class="rt">Leader's Guide (slide notes)</span><span class="rs">Niloma, backup Mandi</span><span class="pill soon">Coming soon</span></li>
           <li><span class="rt">Participant Guide &amp; workbook</span><span class="rs">Engagement strategy, scorecard, 30-60-90 plan</span><span class="pill soon">Coming soon</span></li>
           <li><span class="rt">Pre-workshop survey</span><span class="rs">Mandi, backup Niloma</span><span class="pill soon">Coming soon</span></li>
